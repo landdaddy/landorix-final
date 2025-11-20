@@ -48,16 +48,29 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    setTimeout(() => {
-      document.getElementById('preloader').classList.add('fade');
+    // Wait for DOM + a tiny buffer so Leaflet sees the map div
+    window.addEventListener('load', () => {
       setTimeout(() => {
-        document.body.classList.add('ready');
-        setTimeout(() => map.invalidateSize(), 100);
-      }, 1600);
-    }, 3000);
+        document.getElementById('preloader').classList.add('fade');
+        setTimeout(() => {
+          document.body.classList.add('ready');
 
-    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
+          // Initialize map only after everything is visible
+          const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 12);
 
-    // ESRI World Imagery — high-res satellite (free & beautiful)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Esri, Maxar, Earthstar Geographics
+          // ESRI World Imagery – high-res satellite, free, no key
+          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Esri, Maxar, Earthstar Geographics',
+            maxZoom: 22
+          }).addTo(map);
+
+          L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+          // Fix Leaflet size after reveal
+          setTimeout(() => map.invalidateSize(), 100);
+        }, 1600);
+      }, 100);
+    });
+  </script>
+</body>
+</html>

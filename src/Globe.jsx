@@ -9,7 +9,7 @@ useEffect(() => {
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000);
+  renderer.setClearColor(0x000011);
   container.current.appendChild(renderer.domElement);
 
   const geometry = new THREE.SphereGeometry(5, 64, 64);

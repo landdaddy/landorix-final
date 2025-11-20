@@ -4,136 +4,76 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Landorix – Pinal County</title>
-
   <meta property="og:title" content="LANDORIX">
   <meta property="og:description" content="Pinal County parcel intelligence – satellite view.">
   <meta property="og:image" content="https://landorix.com/preview.jpg">
   <meta property="og:url" content="https://landorix.com">
   <meta name="twitter:card" content="summary_large_image">
-
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;background:#000;color:#fff;font-family:'Exo 2',sans-serif;overflow:hidden;}
-    
-    #preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.5s ease-out;}
+
+    /* === PRELOADER – untouched & beautiful === */
+    #preloader{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.8s ease-out;}
     #preloader.fade{opacity:0;pointer-events:none;}
     h1{font-size:clamp(4rem,14vw,10rem);font-weight:700;letter-spacing:0.8rem;color:#fff;text-shadow:0 0 60px rgba(255,255,255,0.9);}
     .mountain{width:clamp(200px,80vw,420px);animation:float 7s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,255,255,0.5));}
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-35px)}}
-
     #main{display:none;height:100%;}
     body.ready #main{display:block;}
     body.ready #preloader{display:none;}
     #map{height:100%;width:100%;}
 
+    /* === HEADER === */
     .title-bar{
-      position:absolute;top:0;left:0;right:0;height:70px;
-      background:linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
-      display:flex;align-items:center;padding:0 30px;z-index:1000;
-      backdrop-filter:blur(10px);
+      position:fixed;top:0;left:0;right:0;height:86px;
+      background:linear-gradient(to bottom,rgba(0,0,0,0.92),transparent);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 36px;z-index:1000;
+      backdrop-filter:blur(14px);
     }
     .title-bar h2{
-      font-size:2.8rem;font-weight:700;letter-spacing:0.6rem;color:#fff;
-      text-shadow:0 2px 10px rgba(0,0,0,0.8);
+      font-size:2.9rem;font-weight:700;letter-spacing:0.58rem;color:#fff;
     }
 
-    .filter-panel{
-      position:absolute;top:90px;left:20px;width:340px;
-      background:rgba(15,15,15,0.95);border:1px solid rgba(255,255,255,0.2);
-      border-radius:12px;padding:20px;z-index:1000;
-      backdrop-filter:blur(20px);box-shadow:0 10px 40px rgba(0,0,0,0.6);
+    /* === HAMBURGER (mobile only) === */
+    .hamburger{display:none;cursor:pointer;width:30px;height:22px;position:relative;}
+    .hamburger span{background:#fff;height:1.5px;width:100%;position:absolute;left:0;transition:all .35s ease;}
+    .hamburger span:nth-child(1){top:0;}
+    .hamburger span:nth-child(2){top:10px;}
+    .hamburger span:nth-child(3){top:20px;}
+    .hamburger.active span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger.active span:nth-child(2){opacity:0;}
+    .hamburger.active span:nth-child(3){transform:rotate(-45deg);top:10px;}
+
+    /* === DESKTOP FILTER BAR – centered, ultra-minimal === */
+    .desktop-filters{
+      position:fixed;top:100px;left:50%;transform:translateX(-50%);
+      display:flex;align-items:center;gap:40px;
+      background:rgba(15,15,15,0.7);backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,0.18);padding:16px 32px;
+      z-index:900;
     }
-    .filter-panel h3{
-      font-size:1.4rem;margin-bottom:18px;color:#00ffff;letter-spacing:0.1rem;
+    .desktop-filters label{
+      font-size:0.68rem;letter-spacing:0.08rem;color:rgba(255,255,255,0.55);display:block;margin-bottom:6px;
     }
-    .filter-group{margin-bottom:20px;}
-    label{display:block;margin-bottom:6px;font-size:0.95rem;color:#ccc;}
-    input, select{
-      width:100%;padding:10px 12px;background:#222;border:1px solid #444;
-      border-radius:8px;color:#fff;font-family:inherit;font-size:1rem;
+    .desktop-filters input,
+    .desktop-filters select{
+      background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.4);
+      color:#fff;font-size:0.95rem;padding:6px 0;width:120px;transition:border-color .3s;
     }
-    input:focus, select:focus{outline:none;border-color:#00ffff;box-shadow:0 0 0 3px rgba(0,255,255,0.2);}
-    .input-row{display:flex;gap:10px;}
-    .input-row input{width:48%;}
-  </style>
-</head>
-<body>
-
-  <div id="preloader">
-    <h1>LANDORIX</h1>
-    <svg class="mountain" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 210 L200 70 L400 210 Z" fill="#222"/>
-      <path d="M0 210 L200 90 L400 210 Z" fill="#444"/>
-      <path d="M100 210 L200 120 L300 210 Z" fill="#999"/>
-      <path d="M140 210 L200 150 L260 210 Z" fill="#fff"/>
-    </svg>
-  </div>
-
-  <div id="main">
-    <div id="map"></div>
-
-    <div class="title-bar">
-      <h2>LANDORIX</h2>
-    </div>
-
-    <div class="filter-panel">
-      <h3>FILTERS</h3>
-      <div class="filter-group">
-        <label>Parcel Size (acres)</label>
-        <div class="input-row">
-          <input type="number" id="minAcres" placeholder="Min" value="5">
-          <input type="number" id="maxAcres" placeholder="Max" value="">
-        </div>
-      </div>
-      <div class="filter-group">
-        <label>City / Area</label>
-        <select id="cityFilter">
-          <option value="">All Areas</option>
-          <option>Casa Grande</option>
-          <option>Maricopa</option>
-          <option>Apache Junction</option>
-          <option>Florence</option>
-          <option>Coolidge</option>
-          <option>Eloy</option>
-          <option>Queen Creek</option>
-          <option>San Tan Valley</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Zoning</label>
-        <select id="zoningFilter">
-          <option value="">All Zones</option>
-          <!-- Will be populated from Pinal County code -->
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('preloader').classList.add('fade');
-        setTimeout(() => {
-          document.body.classList.add('ready');
-          initMap();
-        }, 1600);
-      }, 100);
-    });
-
-    function initMap() {
-      const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
-
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Esri, Maxar',
-        maxZoom: 22
-      }).addTo(map);
-
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-      setTimeout(() => map.invalidateSize(), 200);
+    .desktop-filters input:focus,
+    .desktop-filters select:focus{
+      outline:none;border-bottom-color:#fff;
     }
-  </script>
-</body>
-</html>
+    .divider{width:1px;height:40px;background:rgba(255,255,255,0.22);}
+
+    /* === MOBILE FILTER PANEL === */
+    .mobile-filters{
+      position:fixed;top:0;right:0;height:100%;width:340px;
+      background:rgba(8,8,8,0.98);backdrop-filter:blur(24px);
+      border-left:1px solid rgba(255,255,255,0.15);
+      padding:110px 40px 40px;z-index:999;
+      transform:translateX(100%);

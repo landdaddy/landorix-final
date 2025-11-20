@@ -62,7 +62,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-geojson-vt@1.3.2/leaflet-geojson-vt.js"></script>
+  <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
   <script>
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
@@ -80,27 +80,20 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // YOUR FULL PINAL COUNTY PARCELS — OFFLINE, FOREVER, SMOOTH
-    const parcels = L.geoJson.vt({
-      url: 'AssessorParcelBooks.geojson',
-      style: function (feature, zoom) {
-        return {
-          color: '#fff',
-          weight: zoom > 14 ? 2 : 1,
-          fillOpacity: 0,
-          opacity: 0.8
-        };
+    // OFFICIAL PINAL COUNTY OPEN DATA PORTAL PARCELS — CRISP OUTLINES, NO ERRORS
+    L.esri.featureLayer({
+      url: 'https://gis.pinal.gov/arcgis/rest/services/OpenData/MapServer/1',
+      style: {
+        color: '#fff',
+        weight: 1.5,
+        fillOpacity: 0
       },
       onEachFeature: (feature, layer) => {
-        const p = feature.properties;
-        if (p.APN) {
-          layer.bindPopup(`<b>APN:</b> ${p.APN}<br><b>Acreage:</b> ${p.ACREAGE || 'N/A'}`);
+        const props = feature.properties;
+        if (props.APN) {
+          layer.bindPopup(`<b>APN:</b> ${props.APN}<br><b>Acreage:</b> ${props.ACREAGE || 'N/A'}`);
         }
-      },
-      maxZoom: 18,
-      tolerance: 3,
-      extent: 4096,
-      buffer: 64
+      }
     }).addTo(map);
   </script>
 </body>

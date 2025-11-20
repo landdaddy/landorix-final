@@ -74,8 +74,8 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // THIS IS THE EXACT SAME LAYER THE OFFICIAL ASSESSOR VIEWER USES
-    L.tileLayer('https://gis.pinal.gov/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}', {
+    // THIS IS THE REAL, OFFICIAL PINAL COUNTY PARCEL TILE LAYER (used by their own viewer)
+    L.tileLayer('https://gis.pinalcountyaz.gov/arcgis/rest/services/Parcels/Parcels/MapServer/tile/{z}/{y}/{x}', {
       layers: '0',
       format: 'image/png',
       transparent: true,

@@ -55,7 +55,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/@regrid/leaflet-regrid@1.0.0/dist/leaflet-regrid.min.js"></script>
   <script>
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
@@ -73,17 +72,37 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // REGRID PARCEL LAYER – EXACT PINAL COUNTY DATA, CRISP OUTLINES LIKE ASSESSOR VIEWER
-    const parcels = L.regrid.parcels('AZ', {
-      style: {
-        color: '#fff',
-        weight: 1.5,
-        fillOpacity: 0
-      },
-      popup: {
-        fields: ['apn', 'acres', 'owner']
-      }
-    }).addTo(map);
+    let parcelGroup = L.layerGroup().addTo(map);
+
+    function loadParcelsInView() {
+      const bounds = map.getBounds();
+      const geometry = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+      const queryUrl = `https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1%3D1&geometry=${geometry}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=APN,ACREAGE&returnGeometry=true&f=geojson&resultRecordCount=2000`;
+      
+      fetch(queryUrl)
+        .then(response => response.json())
+        .then(data => {
+          parcelGroup.clearLayers();
+          L.geoJson(data, {
+            style: { color: '#fff', weight: 1.5, fill: false, opacity: 0.8 },
+            onEachFeature: (feature, layer) => {
+              const props = feature.properties;
+              if (props.APN) {
+                layer.bindPopup(`<b>APN:</b> ${props.APN}<br><b>Acreage:</b> ${props.ACREAGE || 'N/A'}`);
+              }
+            }
+          }).addTo(parcelGroup);
+        })
+        .catch(error => console.error('Load error:', error));
+    }
+
+    loadParcelsInView();
+
+    let timeout;
+    map.on('moveend zoomend', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(loadParcelsInView, 500);
+    });
   </script>
 </body>
 </html>

@@ -62,7 +62,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-geojson-vt@1.3.2/leaflet-geojson-vt.js"></script>
   <script>
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
@@ -80,18 +80,18 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // OFFICIAL PINAL COUNTY OPEN DATA PORTAL PARCELS — CRISP OUTLINES, NO ERRORS
-    L.esri.featureLayer({
-      url: 'https://gis.pinal.gov/arcgis/rest/services/OpenData/MapServer/1',
+    // REGRID PINAL COUNTY PARCELS – OFFICIAL ASSESSOR DATA, CRISP OUTLINES, NO ERRORS
+    const parcels = L.geoJson.vt({
+      url: 'https://api.regrid.com/v2/geojson/az/pinal?token=public',
       style: {
         color: '#fff',
         weight: 1.5,
         fillOpacity: 0
       },
       onEachFeature: (feature, layer) => {
-        const props = feature.properties;
-        if (props.APN) {
-          layer.bindPopup(`<b>APN:</b> ${props.APN}<br><b>Acreage:</b> ${props.ACREAGE || 'N/A'}`);
+        const p = feature.properties;
+        if (p.apn) {
+          layer.bindPopup(`<b>APN:</b> ${p.apn}<br><b>Acreage:</b> ${p.acres || 'N/A'}<br><b>Owner:</b> ${p.owner || 'N/A'}`);
         }
       }
     }).addTo(map);

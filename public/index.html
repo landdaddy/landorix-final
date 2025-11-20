@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LANDORIX – Pinal County Land Intelligence</title>
   <meta property="og:title" content="LANDORIX">
-  <meta property="og:description" content="Pinal County land intelligence — clean satellite view.">
+  <meta property="og:description" content="Pinal County land intelligence — satellite view.">
   <meta property="og:image" content="https://landorix.com/preview.jpg">
   <meta property="og:url" content="https://landorix.com">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Clean, luxury font stack -->
+  <!-- Clean, professional font (no spaceship vibes) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
@@ -18,66 +18,71 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;background:#000;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;}
 
-    /* Simple elegant preloader */
+    /* Your original beautiful preloader – back and perfect */
     #preloader{
-      position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999;
-      transition:opacity 1.2s ease-out;
+      position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
+      transition:opacity 1.6s ease-out;
     }
     #preloader.fade{opacity:0;pointer-events:none;}
     #preloader h1{
-      font-size:2.8rem;font-weight:600;letter-spacing:0.4rem;color:#fff;
-      animation:pulse 2s infinite;
+      font-size:clamp(4rem,14vw,10rem);font-weight:700;letter-spacing:0.7rem;color:#fff;
+      text-shadow:0 0 50px rgba(255,255,255,0.7);
     }
-    @keyframes pulse{0%,100%{opacity:0.7}50%{opacity:1}}
+    .mountain{
+      width:clamp(200px,80vw,420px);margin-top:40px;
+      animation:float 7s ease-in-out infinite;
+      filter:drop-shadow(0 0 30px rgba(255,255,255,0.4));
+    }
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
 
     #main{display:none;height:100%;}
     body.ready #main{display:block;}
     body.ready #preloader{display:none;}
     #map{height:100%;width:100%;}
 
-    /* Ultra-minimal header */
+    /* Clean sharp header */
     header{
-      position:fixed;top:0;left:0;right:0;height:70px;
+      position:fixed;top:0;left:0;right:0;height:76px;
       background:#000;border-bottom:1px solid rgba(255,255,255,0.1);
       display:flex;align-items:center;justify-content:center;z-index:1000;
     }
     header h1{
-      font-size:1.9rem;font-weight:600;letter-spacing:0.35rem;color:#fff;
+      font-size:2.2rem;font-weight:600;letter-spacing:0.5rem;color:#fff;
     }
 
-    /* Hamburger – shown on ALL devices */
+    /* Hamburger on ALL devices */
     .hamburger{
-      position:absolute;right:24px;top:50%;transform:translateY(-50%);
-      width:28px;height:20px;cursor:pointer;
+      position:absolute;right:28px;top:50%;transform:translateY(-50%);
+      width:30px;height:22px;cursor:pointer;
     }
     .hamburger span{
-      background:#fff;height:1.5px;width:100%;position:absolute;left:0;transition:all .3s;
+      background:#fff;height:1.8px;width:100%;position:absolute;left:0;transition:all .35s ease;
     }
     .hamburger span:nth-child(1){top:2px;}
-    .hamburger span:nth-child(2){top:10px;}
-    .hamburger span:nth-child(3){top:18px;}
-    .hamburger.active span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger span:nth-child(2){top:11px;}
+    .hamburger span:nth-child(3){top:20px;}
+    .hamburger.active span:nth-child(1){transform:rotate(45deg);top:11px;}
     .hamburger.active span:nth-child(2){opacity:0;}
-    .hamburger.active span:nth-child(3){transform:rotate(-45deg);top:10px;}
+    .hamburger.active span:nth-child(3){transform:rotate(-45deg);top:11px;}
 
-    /* Right drawer panel – works on mobile + desktop */
+    /* Right drawer – mobile + desktop */
     .drawer{
       position:fixed;top:0;right:0;height:100%;width:340px;max-width:90vw;
       background:#000;border-left:1px solid rgba(255,255,255,0.12);
-      padding:90px 40px 40px;z-index:999;
-      transform:translateX(100%);transition:transform .4s ease;
+      padding:100px 40px 40px;z-index:999;
+      transform:translateX(100%);transition:transform .42s ease;
     }
     .drawer.open{transform:translateX(0);}
     .drawer h2{
-      font-size:1.6rem;font-weight:600;letter-spacing:0.2rem;margin-bottom:32px;
+      font-size:1.7rem;font-weight:600;letter-spacing:0.2rem;margin-bottom:36px;
     }
     .drawer label{
-      display:block;font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:8px;
+      display:block;font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:10px;
     }
     .drawer input,.drawer select{
       width:100%;background:transparent;border:none;
-      border-bottom:1px solid rgba(255,255,255,0.3);
-      color:#fff;padding:12px 0;font-size:1.1rem;
+      border-bottom:1px solid rgba(255,255,255,0.35);
+      color:#fff;padding:14px 0;font-size:1.15rem;
     }
     .drawer input:focus,.drawer select:focus{
       outline:none;border-bottom-color:#fff;
@@ -86,68 +91,74 @@
 </head>
 <body>
 
-  <!-- Clean preloader -->
+  <!-- Your original mountain preloader – restored -->
   <div id="preloader">
-    <h1>LANDORIXh1>
-  div>
+    <h1>LANDORIX</h1>
+    <svg class="mountain" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 210 L200 70 L400 210 Z" fill="#222"/>
+      <path d="M0 210 L200 90 L400 210 Z" fill="#444"/>
+      <path d="M100 210 L200 120 L300 210 Z" fill="#999"/>
+      <path d="M140 210 L200 150 L260 210 Z" fill="#fff"/>
+    </svg>
+  </div>
 
   <div id="main">
-    <div id="map">div>
+    <div id="map"></div>
 
-    <!-- Minimal header with hamburger on all screens -->
+    <!-- Header + hamburger -->
     <header>
-      <h1>LANDORIXh1>
+      <h1>LANDORIX</h1>
       <div class="hamburger" id="hamburger">
-        <span>span><span>span><span>span>
-      div>
-    header>
+        <span></span><span></span><span></span>
+      </div>
+    </header>
 
-    <!-- Drawer (mobile + desktop) -->
+    <!-- Drawer (works on every screen size) -->
     <div class="drawer" id="drawer">
-      <h2>FILTERSh2>
-      <div style="margin-bottom:32px;">
-        <label>Min Acreslabel>
+      <h2>FILTERS</h2>
+      <div style="margin-bottom:36px;">
+        <label>Min Acres</label>
         <input type="number" placeholder="0" value="5">
-      div>
-      <div style="margin-bottom:32px;">
-        <label>Max Acreslabel>
+      </div>
+      <div style="margin-bottom:36px;">
+        <label>Max Acres</label>
         <input type="number" placeholder="No limit">
-      div>
-      <div style="margin-bottom:32px;">
-        <label>City / Arealabel>
+      </div>
+      <div style="margin-bottom:36px;">
+        <label>City / Area</label>
         <select>
-          <option value="">All Areasoption>
-          <option>Casa Grandeoption>
-          <option>Maricopaoption>
-          <option>Apache Junctionoption>
-          <option>Florenceoption>
-          <option>Coolidgeoption>
-          <option>Eloyoption>
-          <option>Queen Creekoption>
-          <option>San Tan Valleyoption>
-        select>
-      div>
+          <option value="">All Areas</option>
+          <option>Casa Grande</option>
+          <option>Maricopa</option>
+          <option>Apache Junction</option>
+          <option>Florence</option>
+          <option>Coolidge</option>
+          <option>Eloy</option>
+          <option>Queen Creek</option>
+          <option>San Tan Valley</option>
+        </select>
+      </div>
       <div>
-        <label>Zoninglabel>
-        <select><option value="">All Zonesoption>select>
-      div>
-    div>
-  div>
+        <label>Zoning</label>
+        <select><option value="">All Zones</option></select>
+      </div>
+    </div>
+  </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Preloader
+    // Preloader → map
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('preloader').classList.add('fade');
         setTimeout(() => {
           document.body.classList.add('ready');
           initMap();
-        }, 1200);
-      }, 400);
+        }, 1600);
+      }, 200);
     });
 
-    // Hamburger + drawer
+    // Hamburger toggle
     const hamburger = document.getElementById('hamburger');
     const drawer = document.getElementById('drawer');
     hamburger.addEventListener('click', e => {
@@ -161,15 +172,15 @@
     });
     drawer.addEventListener('click', e => e.stopPropagation());
 
-    // Map
+    // Map init
     function initMap() {
       const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Esri · Maxar', maxZoom: 22
       }).addTo(map);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
-      setTimeout(() => map.invalidateSize(), 300);
+      setTimeout(() => map.invalidateSize(), 400);
     }
-  script>
-body>
-html>
+  </script>
+</body>
+</html>

@@ -13,7 +13,7 @@ useEffect(() => {
   container.current.appendChild(renderer.domElement);
 
   const geometry = new THREE.SphereGeometry(5, 64, 64);
-  const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
+  const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
   const material = new THREE.MeshBasicMaterial({ map: texture });
   const earth = new THREE.Mesh(geometry, material);
   scene.add(earth);

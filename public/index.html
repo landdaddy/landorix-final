@@ -2,67 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Landorix</title>
   <style>
     body,html{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#000}
-    #loader{position:fixed;inset:0;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Helvetica Neue',sans-serif;font-size:4rem;letter-spacing:.3em;z-index:9999;opacity:1;transition:opacity 1s}
+    #loader{position:fixed;inset:0;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:4rem;letter-spacing:.3em;z-index:9999;opacity:1;transition:opacity 1s}
     #spinner{margin-top:40px;width:80px;height:80px;border:4px solid rgba(255,255,255,.2);border-top:4px solid #fff;border-radius:50%;animation:s 1s linear infinite}
     @keyframes s{to{transform:rotate(360deg)}}
-    #canvas{position:absolute;top:0;left:0;width:100vw;height:100vh;z-index:1}
+    canvas{position:absolute;top:0;left:0;width:100%;height:100%}
   </style>
 </head>
 <body>
   <div id="loader">LANDORIX<div id="spinner"></div></div>
-  <canvas id="canvas"></canvas>
+  <canvas id="c"></canvas>
   <script>
     const loader = document.getElementById('loader');
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    let a = 0;
 
-    // Hide loader after 3 seconds
-    setTimeout(() => loader.style.opacity = '0', 3000);
+    setTimeout(() => loader.style.opacity = 0, 3000);
 
-    // Spinning Earth
-    let angle = 0;
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const draw = () => {
       ctx.fillStyle = '#000011';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+      ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(angle);
+      ctx.translate(canvas.width/2, canvas.height/2);
+      ctx.rotate(a);
       ctx.beginPath();
-      ctx.arc(0, 0, 200, 0, 2 * Math.PI);
-      ctx.fillStyle = '#1e3a8a';
+      ctx.arc(0,0,200,0,6.28);
+      ctx.fillStyle = '#1e40af';
       ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 4;
       ctx.stroke();
       ctx.restore();
-
-      angle += 0.01;
-      requestAnimationFrame(animate);
+      a += 0.01;
+      requestAnimationFrame(draw);
     };
-    animate();
+    draw();
 
-    // 8-second zoom (scale up)
-    setTimeout(() => {
-      let scale = 1;
-      const zoom = () => {
-        scale += 0.01;
-        if (scale < 2) requestAnimationFrame(zoom);
-      };
-      zoom();
-    }, 4000);
-
-    // Resize
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    addEventListener('resize', () => {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
     });
   </script>
 </body>

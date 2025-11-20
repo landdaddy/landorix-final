@@ -4,6 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Landorix – Pinal County</title>
+
+  <!-- iPhone / iMessage / Social Media Preview -->
+  <meta property="og:title" content="LANDORIX – Pinal County Parcel Map">
+  <meta property="og:description" content="Full parcel boundaries, subdividable lot finder, and instant intelligence for Pinal County, Arizona.">
+  <meta property="og:image" content="https://landorix.com/preview.jpg">
+  <meta property="og:url" content="https://landorix.com">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
@@ -70,7 +79,7 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // PINAL COUNTY PARCELS – crisp white outlines, no lag
+    // Official Pinal County parcel tiles – crisp, full coverage, no lag
     L.tileLayer('https://gismaps.pinalcountyaz.gov/arcgis/rest/services/Parcels/Parcels/MapServer/tile/{z}/{y}/{x}', {
       layers: '0',
       format: 'image/png',

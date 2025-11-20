@@ -5,7 +5,7 @@ export default function App() {
   const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => setShowLoader(false), 3000);
+    setTimeout(() => setShowLoader(false), 1000);
   }, []);
 
   return (

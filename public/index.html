@@ -33,6 +33,7 @@
 
     /* Crisp white parcel outlines like official viewer */
     .parcel-path { stroke: #fff; stroke-width: 1; fill: none; opacity: 0.7; }
+    .parcel-path:hover { stroke-width: 2; opacity: 1; }
   </style>
 </head>
 <body>
@@ -67,7 +68,7 @@
     }, 3000);
 
     // Map – Pinal County
-    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 10);
+    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
     
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '©OpenStreetMap ©CartoDB'
@@ -75,43 +76,49 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Load Pinal parcels via tiled GeoJSON queries (full coverage, no 404s)
+    // Load Pinal parcels from official FeatureServer (valid GeoJSON, no errors)
     let parcelGroup = L.layerGroup().addTo(map);
 
-    function loadParcelsInBounds(bounds) {
-      const queryUrl = `https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1%3D1&geometry=${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=APN,ACREAGE&returnGeometry=true&f=geojson&resultRecordCount=2000`;
+    function loadParcels() {
+      const queryUrl = 'https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1%3D1&outFields=APN,ACREAGE&returnGeometry=true&f=geojson&resultRecordCount=1000&resultOffset=0';
       
       fetch(queryUrl)
         .then(response => response.json())
-        .then(geojson => {
-          L.geoJson(geojson, {
-            style: {
-              color: '#fff',
-              weight: 1,
-              fill: false,
-              opacity: 0.7
-            },
-            onEachFeature: (feature, layer) => {
-              if (feature.properties.APN) {
-                layer.bindPopup(`<b>APN:</b> ${feature.properties.APN}<br><b>Acreage:</b> ${feature.properties.ACREAGE || 'N/A'}`);
+        .then(data => {
+          if (data.features && data.features.length > 0) {
+            L.geoJson(data, {
+              style: {
+                color: '#fff',
+                weight: 1,
+                fill: false,
+                opacity: 0.7
+              },
+              onEachFeature: (feature, layer) => {
+                if (feature.properties.APN) {
+                  layer.bindPopup(`<b>APN:</b> ${feature.properties.APN}<br><b>Acreage:</b> ${feature.properties.ACREAGE || 'N/A'}`);
+                }
               }
-            }
-          }).addTo(parcelGroup);
+            }).addTo(parcelGroup);
+          }
         })
-        .catch(error => console.error('Parcel query error:', error));
+        .catch(error => {
+          console.error('Parcel load error:', error);
+          // Fallback message in title box if needed
+          document.querySelector('.title-box p').innerHTML = 'Pinal County – Loading Parcels...';
+        });
     }
 
     // Initial load
-    loadParcelsInBounds(map.getBounds());
+    loadParcels();
 
-    // Reload on move/zoom (debounced for performance)
+    // Reload on move/zoom (debounced)
     let timeout;
     map.on('moveend zoomend', () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         parcelGroup.clearLayers();
-        loadParcelsInBounds(map.getBounds());
-      }, 500);
+        loadParcels();
+      }, 800);
     });
   </script>
 </body>

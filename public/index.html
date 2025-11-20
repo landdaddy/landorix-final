@@ -76,4 +76,160 @@
       background:rgba(8,8,8,0.98);backdrop-filter:blur(24px);
       border-left:1px solid rgba(255,255,255,0.15);
       padding:110px 40px 40px;z-index:999;
-      transform:translateX(100%);
+      transform:translateX(100%);transition:transform .45s cubic-bezier(0.22,1,0.36,1);
+    }
+    .mobile-filters.open{transform:translateX(0);}
+    .mobile-filters h3{
+      font-size:1.7rem;margin-bottom:36px;letter-spacing:0.25rem;color:#fff;
+    }
+    .mobile-filters .filter-group{margin-bottom:32px;}
+    .mobile-filters label{
+      font-size:0.82rem;color:rgba(255,255,255,0.6);display:block;margin-bottom:10px;
+    }
+    .mobile-filters input,
+    .mobile-filters select{
+      width:100%;background:transparent;border:none;
+      border-bottom:1px solid rgba(255,255,255,0.4);
+      color:#fff;padding:10px 0;font-size:1.15rem;
+    }
+    .mobile-filters input:focus,
+    .mobile-filters select:focus{
+      outline:none;border-bottom-color:#fff;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1023px){
+      .hamburger{display:block;}
+      .desktop-filters{display:none;}
+    }
+    @media (min-width: 1024px){
+      .mobile-filters{display:none !important;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PRELOADER -->
+  <div id="preloader">
+    <h1>LANDORIX</h1>
+    <svg class="mountain" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 210 L200 70 L400 210 Z" fill="#222"/>
+      <path d="M0 210 L200 90 L400 210 Z" fill="#444"/>
+      <path d="M100 210 L200 120 L300 210 Z" fill="#999"/>
+      <path d="M140 210 L200 150 L260 210 Z" fill="#fff"/>
+    </svg>
+  </div>
+
+  <div id="main">
+    <div id="map"></div>
+
+    <!-- HEADER -->
+    <div class="title-bar">
+      <h2>LANDORIX</h2>
+      <div class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- DESKTOP FILTERS -->
+    <div class="desktop-filters">
+      <div>
+        <label>MIN ACRES</label>
+        <input type="number" id="minAcresDesk" placeholder="0" value="5">
+      </div>
+      <div class="divider"></div>
+      <div>
+        <label>MAX ACRES</label>
+        <input type="number" id="maxAcresDesk" placeholder="No limit">
+      </div>
+      <div class="divider"></div>
+      <div>
+        <label>CITY / AREA</label>
+        <select id="cityFilterDesk">
+          <option value="">All Areas</option>
+          <option>Casa Grande</option>
+          <option>Maricopa</option>
+          <option>Apache Junction</option>
+          <option>Florence</option>
+          <option>Coolidge</option>
+          <option>Eloy</option>
+          <option>Queen Creek</option>
+          <option>San Tan Valley</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <label>ZONING</label>
+        <select id="zoningFilterDesk"><option value="">All Zones</option></select>
+      </div>
+    </div>
+
+    <!-- MOBILE FILTERS -->
+    <div class="mobile-filters" id="mobileFilters">
+      <h3>FILTERS</h3>
+      <div class="filter-group">
+        <label>Parcel Size (acres)</label>
+        <input type="number" id="minAcres" placeholder="Min" value="5" style="margin-bottom:16px;">
+        <input type="number" id="maxAcres" placeholder="Max">
+      </div>
+      <div class="filter-group">
+        <label>City / Area</label>
+        <select id="cityFilter">
+          <option value="">All Areas</option>
+          <option>Casa Grande</option>
+          <option>Maricopa</option>
+          <option>Apache Junction</option>
+          <option>Florence</option>
+          <option>Coolidge</option>
+          <option>Eloy</option>
+          <option>Queen Creek</option>
+          <option>San Tan Valley</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Zoning</label>
+        <select id="zoningFilter"><option value="">All Zones</option></select>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Preloader
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('preloader').classList.add('fade');
+        setTimeout(() => {
+          document.body.classList.add('ready');
+          initMap();
+        }, 1800);
+      }, 100);
+    });
+
+    // Hamburger
+    const hamburger = document.getElementById('hamburger');
+    const mobileFilters = document.getElementById('mobileFilters');
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hamburger.classList.toggle('active');
+      mobileFilters.classList.toggle('open');
+    });
+    // Close on outside click
+    document.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      mobileFilters.classList.remove('open');
+    });
+    mobileFilters.addEventListener('click', e => e.stopPropagation());
+
+    // Map
+    function initMap() {
+      const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Esri, Maxar', maxZoom: 22
+      }).addTo(map);
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+  </script>
+</body>
+</html>

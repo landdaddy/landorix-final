@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Landorix – Pinal County</title>
 
-  <!-- iPhone / iMessage / Social Media Preview -->
   <meta property="og:title" content="LANDORIX">
   <meta property="og:description" content="Pinal County parcel intelligence.">
   <meta property="og:image" content="https://landorix.com/preview.jpg">
@@ -38,4 +37,32 @@
       <path d="M0 210 L200 70 L400 210 Z" fill="#222"/>
       <path d="M0 210 L200 90 L400 210 Z" fill="#444"/>
       <path d="M100 210 L200 120 L300 210 Z" fill="#999"/>
-      <path d="M140 210 L200 
+      <path d="M140 210 L200 150 L260 210 Z" fill="#fff"/>
+    </svg>
+  </div>
+
+  <div id="main">
+    <div id="map"></div>
+    <div class="title"><h2>LANDORIX</h2></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    setTimeout(() => {
+      document.getElementById('preloader').classList.add('fade');
+      setTimeout(() => {
+        document.body.classList.add('ready');
+        setTimeout(() => map.invalidateSize(), 100);
+      }, 1600);
+    }, 3000);
+
+    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 10);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '©OpenStreetMap ©CartoDB'
+    }).addTo(map);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+  </script>
+</body>
+</html>

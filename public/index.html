@@ -57,6 +57,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
   <script>
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
@@ -74,14 +75,22 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // THIS IS THE REAL, OFFICIAL PINAL COUNTY PARCEL TILE LAYER (used by their own viewer)
-    L.tileLayer('https://gis.pinalcountyaz.gov/arcgis/rest/services/Parcels/Parcels/MapServer/tile/{z}/{y}/{x}', {
-      layers: '0',
-      format: 'image/png',
-      transparent: true,
-      opacity: 1,
-      attribution: 'Pinal County Assessor'
-    }).addTo(map).bringToFront();
+    // OFFICIAL PINAL COUNTY PARCEL FEATURE LAYER (crisp white outlines like assessor viewer)
+    L.esri.featureLayer({
+      url: 'https://gis.pinal.gov/mapping/rest/services/TaxParcels/FeatureServer/3',
+      style: function (feature) {
+        return {
+          color: '#fff',
+          weight: 1.5,
+          fillOpacity: 0
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        if (feature.properties.APN) {
+          layer.bindPopup('<b>APN:</b> ' + feature.properties.APN + '<br><b>Acreage:</b> ' + (feature.properties.ACREAGE || 'N/A'));
+        }
+      }
+    }).addTo(map);
   </script>
 </body>
 </html>

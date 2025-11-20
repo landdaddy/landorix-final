@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "serve -s build -l $PORT",
+    "start": "serve -s build -l $PORT --listen 0.0.0.0:$PORT"
     "build": "react-scripts build"
   },
   "dependencies": {

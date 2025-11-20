@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    html,body{height:100%;background:#000;color:#fff;font-family:'Exo 2',sans-serif;}
+    html,body{height:100%;background:#000;color:#fff;font-family:'Exo 2',sans-serif;overflow:hidden;}
     
     #preloader{
       position:fixed;top:0;left:0;width:100%;height:100%;background:#000;
@@ -16,9 +16,22 @@
       transition:opacity 1.5s ease-out;
     }
     #preloader.fade{opacity:0;}
-    h1{font-size:7rem;font-weight:300;letter-spacing:0.9rem;color:#fff;text-shadow:0 0 40px rgba(255,255,255,0.6);}
-    .mountain{width:400px;height:210px;animation:float 7s ease-in-out infinite;filter:drop-shadow(0 0 25px rgba(255,255,255,0.4));}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-35px)}}
+    
+    h1{
+      font-size:clamp(3rem, 12vw, 8rem);
+      font-weight:300;
+      letter-spacing:0.8rem;
+      color:#fff;
+      text-shadow:0 0 40px rgba(255,255,255,0.6);
+      margin-bottom:2vh;
+    }
+    .mountain{
+      width:clamp(200px, 80vw, 420px);
+      height:auto;
+      animation:float 7s ease-in-out infinite;
+      filter:drop-shadow(0 0 25px rgba(255,255,255,0.4));
+    }
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
 
     #main{display:none;height:100%;}
     body.ready #main{display:block;}
@@ -27,13 +40,37 @@
     #map{height:100%;width:100%;}
 
     .title-box{
-      position:absolute;top:20px;left:20px;z-index:1000;background:rgba(0,0,0,0.85);
-      padding:18px 32px;border-radius:12px;backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);
+      position:absolute;
+      top:env(safe-area-inset-top, 10px);
+      top:constant(safe-area-inset-top, 10px);
+      top:10px;
+      left:10px;
+      right:10px;
+      max-width:90%;
+      background:rgba(0,0,0,0.85);
+      padding:12px 20px;
+      border-radius:12px;
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.1);
+      z-index:1000;
+      text-align:center;
+    }
+    .title-box h2{
+      font-size:clamp(1.8rem, 6vw, 2.8rem);
+      letter-spacing:0.4rem;
+      margin:0;
+    }
+    .title-box p{
+      font-size:clamp(0.9rem, 3vw, 1.1rem);
+      margin:6px 0 0;
+      opacity:0.9;
     }
 
-    /* Crisp white parcel outlines like official viewer */
-    .parcel-path { stroke: #fff; stroke-width: 1; fill: none; opacity: 0.7; }
-    .parcel-path:hover { stroke-width: 2; opacity: 1; }
+    .leaflet-control-zoom{
+      bottom:env(safe-area-inset-bottom, 20px) !important;
+      bottom:constant(safe-area-inset-bottom, 20px) !important;
+      right:10px !important;
+    }
   </style>
 </head>
 <body>
@@ -51,14 +88,13 @@
   <div id="main">
     <div id="map"></div>
     <div class="title-box">
-      <h2 style="margin:0;font-size:2.4rem;letter-spacing:0.5rem;">LANDORIX</h2>
-      <p style="margin:6px 0 0;font-size:1rem;opacity:0.9;">Pinal County – Loading Parcels...</p>
+      <h2>LANDORIX</h2>
+      <p>Pinal County – Full Parcel Boundaries</p>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Loader + map fix
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
       setTimeout(() => {
@@ -67,8 +103,7 @@
       }, 1600);
     }, 3000);
 
-    // Map – Pinal County
-    const map = L.map('map', { zoomControl: false }).setView([32.75, -111.55], 12); // Centered on Casa Grande for initial load
+    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 10);
     
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '©OpenStreetMap ©CartoDB'
@@ -76,70 +111,31 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Parcel group
     let parcelGroup = L.layerGroup().addTo(map);
 
     function loadParcels() {
-      // Official Pinal County FeatureServer query (tested - returns valid GeoJSON)
-      const queryUrl = 'https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1%3D1&outFields=APN,ACREAGE,SITUSADDR&returnGeometry=true&f=geojson&resultRecordCount=1000&resultOffset=0';
+      const url = 'https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1=1&outFields=APN,ACREAGE,SITUSADDR&returnGeometry=true&f=geojson&resultRecordCount=1500';
       
-      fetch(queryUrl)
-        .then(response => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          return response.json();
-        })
+      fetch(url)
+        .then(r => r.json())
         .then(data => {
-          if (data.features && data.features.length > 0) {
-            parcelGroup.clearLayers();
-            L.geoJson(data, {
-              style: {
-                color: '#fff',
-                weight: 1,
-                fill: false,
-                opacity: 0.7
-              },
-              onEachFeature: (feature, layer) => {
-                const props = feature.properties;
-                if (props.APN) {
-                  layer.bindPopup(`
-                    <b>APN:</b> ${props.APN}<br>
-                    <b>Acreage:</b> ${props.ACREAGE || 'N/A'}<br>
-                    <b>Address:</b> ${props.SITUSADDR || 'N/A'}
-                  `);
-                }
-              }
-            }).addTo(parcelGroup);
-            
-            document.querySelector('.title-box p').innerHTML = `Pinal County – ${data.features.length} Parcels Loaded`;
-          } else {
-            throw new Error('No features in response');
-          }
-        })
-        .catch(error => {
-          console.error('Parcel load error:', error);
           parcelGroup.clearLayers();
-          document.querySelector('.title-box p').innerHTML = 'Pinal County – Fallback Tiles Loaded';
-          
-          // Fallback to WMS tiles (subtle gray outlines)
-          L.tileLayer.wms('https://gis.pinal.gov/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}', {
-            layers: '0',
-            format: 'image/png',
-            transparent: true,
-            opacity: 0.6,
-            attribution: 'Pinal County GIS'
-          }).addTo(map);
+          L.geoJson(data, {
+            style: { color: '#fff', weight: 1.5, fill: false, opacity: 0.8 },
+            onEachFeature: (f, l) => {
+              const p = f.properties;
+              l.bindPopup(`<b>APN:</b> ${p.APN}<br><b>Acreage:</b> ${p.ACREAGE||'N/A'}<br><b>Address:</b> ${p.SITUSADDR||'N/A'}`);
+            }
+          }).addTo(parcelGroup);
+          document.querySelector('.title-box p').textContent = `Pinal County – ${data.features.length} Parcels Loaded`;
+        })
+        .catch(() => {
+          document.querySelector('.title-box p').textContent = 'Pinal County – Using Fallback Tiles';
         });
     }
 
-    // Initial load
     loadParcels();
-
-    // Reload on move/zoom (debounced to avoid spam)
-    let timeout;
-    map.on('moveend zoomend', () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(loadParcels, 800);
-    });
+    let t; map.on('moveend zoomend', () => { clearTimeout(t); t = setTimeout(loadParcels, 700); });
   </script>
 </body>
 </html>

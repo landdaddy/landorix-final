@@ -1,44 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Landorix</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
-
     * { margin:0; padding:0; box-sizing:border-box; }
-    body, html { height:100%; background:#000; overflow:hidden; font-family: 'Orbitron', sans-serif; }
+    html, body { height:100%; background:#000; overflow:hidden; }
+    body { font-family:'Orbitron', sans-serif; }
 
     #preloader {
-      position:fixed; inset:0; background:#000; color:#fff;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      z-index:9999; transition:opacity 1s ease;
+      position:fixed; top:0; left:0; width:100%; height:100%; background:#000;
+      color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      z-index:9999; transition:opacity 1.2s ease-out;
     }
-    #preloader.fade-out { opacity:0; }
+    #preloader.fade { opacity:0; }
 
     h1 {
-      font-size:5.5rem; letter-spacing:0.4rem; margin-bottom:30px;
-      background:linear-gradient(90deg,#fff,#aaa); -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
+      font-size:7rem; letter-spacing:0.6rem; margin-bottom:40px;
+      color: #fff; /* Pure white, no gradient BS */
+      text-shadow: 0 0 20px rgba(255,255,255,0.5); /* Glow for visibility */
     }
 
-    .mountain {
-      width:280px; height:140px; animation:float 6s ease-in-out infinite;
+    .mountain { 
+      width:340px; height:180px; 
+      animation:float 6s ease-in-out infinite; 
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); /* Glow outline so it's not lost on black */
+    }
+    @keyframes float { 
+      0%,100% { transform:translateY(0); } 
+      50% { transform:translateY(-30px); } 
     }
 
-    @keyframes float {
-      0%,100% { transform:translateY(0); }
-      50% { transform:translateY(-20px); }
+    #main {
+      display:none; min-height:100vh; background:#000; color:#fff;
+      padding:40px; text-align:center; font-size:2rem;
     }
-
-    #main { display:none; min-height:100vh; background:#000; color:#fff; }
     body.ready #main { display:block; }
     body.ready #preloader { display:none; }
   </style>
 </head>
 <body>
 
-  <!-- LOADER – disappears after 3 seconds -->
   <div id="preloader">
-    <h1>LAND
+    <h1>LANDORIX</h1>
+    <svg class="mountain" viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 180 L170 60 L340 180 Z" fill="#666"/> <!-- Light gray base -->
+      <path d="M0 180 L170 80 L340 180 Z" fill="#999"/> <!-- Lighter gray -->
+      <path d="M85 180 L170 100 L255 180 Z" fill="#ccc"/> <!-- Even lighter -->
+      <path d="M120 180 L170 120 L220 180 Z" fill="#fff"/> <!-- White peak for pop -->
+    </svg>
+  </div>
+
+  <div id="main">
+    <div style="color:#fff; margin-top:100px;">
+      <h2 style="font-size:3rem; color:#fff;">LANDORIX IS READY</h2>
+      <p style="font-size:1.2rem; color:#ccc;">Loader fixed. Full text visible. Mountains glow. What feature next?</p>
+    </div>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      const loader = document.getElementById('preloader');
+      loader.classList.add('fade');
+      setTimeout(() => {
+        document.body.classList.add('ready');
+      }, 1200);
+    }, 3000);
+  </script>
+</body>
+</html>

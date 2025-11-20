@@ -55,6 +55,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@regrid/leaflet-regrid@1.0.0/dist/leaflet-regrid.min.js"></script>
   <script>
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
@@ -72,14 +73,17 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // OFFICIAL PINAL COUNTY TILED PARCELS – ZERO LAG, PERFECT OUTLINES
-    L.tileLayer('https://gismaps.pinalcountyaz.gov/arcgis/rest/services/Parcels/Parcels/MapServer/tile/{z}/{y}/{x}', {
-      layers: '0',
-      format: 'image/png',
-      transparent: true,
-      opacity: 1,
-      attribution: 'Pinal County Assessor'
-    }).addTo(map).bringToFront();
+    // REGRID PARCEL LAYER – EXACT PINAL COUNTY DATA, CRISP OUTLINES LIKE ASSESSOR VIEWER
+    const parcels = L.regrid.parcels('AZ', {
+      style: {
+        color: '#fff',
+        weight: 1.5,
+        fillOpacity: 0
+      },
+      popup: {
+        fields: ['apn', 'acres', 'owner']
+      }
+    }).addTo(map);
   </script>
 </body>
 </html>

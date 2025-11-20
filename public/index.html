@@ -4,73 +4,132 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Landorix – Pinal County</title>
-
   <meta property="og:title" content="LANDORIX">
   <meta property="og:description" content="Pinal County parcel intelligence – satellite view.">
   <meta property="og:image" content="https://landorix.com/preview.jpg">
   <meta property="og:url" content="https://landorix.com">
   <meta name="twitter:card" content="summary_large_image">
 
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;background:#000;color:#fff;font-family:'Exo 2',sans-serif;overflow:hidden;}
-    #preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.5s ease-out;}
-    #preloader.fade{opacity:0;}
-    h1{font-size:clamp(3rem,12vw,8rem);font-weight:300;letter-spacing:0.8rem;color:#fff;text-shadow:0 0 40px rgba(255,255,255,0.8);}
-    .mountain{width:clamp(200px,80vw,420px);animation:float 7s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,255,255,0.5));}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-35px)}}
+    
+    #preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.5s;}
+    #preloader.fade{opacity:0;pointer-events:none;}
+    h1{font-size:clamp(4rem,14vw,10rem);font-weight:700;letter-spacing:0.8rem;color:#fff;text-shadow:0 0 60px rgba(255,255,255,0.9);}
+    
     #main{display:none;height:100%;}
     body.ready #main{display:block;}
     body.ready #preloader{display:none;}
     #map{height:100%;width:100%;}
-    .title{position:absolute;top:env(safe-area-inset-top,15px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);padding:12px 30px;border-radius:12px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);z-index:1000;text-align:center;}
-    .title h2{font-size:clamp(2.2rem,7vw,3.2rem);letter-spacing:0.5rem;margin:0;color:#fff;}
+
+    /* Sleek sharp title bar */
+    .title-bar{
+      position:absolute;top:0;left:0;right:0;height:70px;
+      background:linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
+      display:flex;align-items:center;padding:0 30px;z-index:1000;
+      backdrop-filter:blur(10px);
+    }
+    .title-bar h2{
+      font-size:2.8rem;font-weight:700;letter-spacing:0.6rem;color:#fff;
+      text-shadow:0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    /* Floating filter panel */
+    .filter-panel{
+      position:absolute;top:90px;left:20px;width:320px;
+      background:rgba(15,15,15,0.92);border:1px solid rgba(255,255,255,0.15);
+      border-radius:12px;padding:20px;z-index:1000;
+      backdrop-filter:blur(20px);box-shadow:0 10px 30px rgba(0,0,0,0.5);
+      transition:transform 0.4s ease;
+    }
+    .filter-panel h3{
+      font-size:1.4rem;margin-bottom:15px;color:#fff;letter-spacing:0.08rem;
+    }
+    .filter-group{margin-bottom:18px;}
+    label{display:block;margin-bottom:6px;font-size:0.95rem;color:#ccc;}
+    select, input{
+      width:100%;padding:10px 12px;background:#222;border:1px solid #444;
+      border-radius:8px;color:#fff;font-family:inherit;font-size:1rem;
+    }
+    select:focus, input:focus{outline:none;border-color:#00ffff;box-shadow:0 0 0 2px rgba(0,255,255,0.2);}
   </style>
 </head>
 <body>
 
   <div id="preloader">
     <h1>LANDORIX</h1>
-    <svg class="mountain" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 210 L200 70 L400 210 Z" fill="#222"/>
-      <path d="M0 210 L200 90 L400 210 Z" fill="#444"/>
-      <path d="M100 210 L200 120 L300 210 Z" fill="#999"/>
-      <path d="M140 210 L200 150 L260 210 Z" fill="#fff"/>
-    </svg>
   </div>
 
   <div id="main">
     <div id="map"></div>
-    <div class="title"><h2>LANDORIX</h2></div>
+
+    <div class="title-bar">
+      <h2>LANDORIX</h2>
+    </div>
+
+    <div class="filter-panel">
+      <h3>FILTERS</h3>
+      <div class="filter-group">
+        <label>Parcel Size (acres)</label>
+        <input type="range" min="0" max="500" value="5" id="sizeFilter">
+        <span id="sizeValue">5+ acres</span>
+      </div>
+      <div class="filter-group">
+        <label>City / Area</label>
+        <select id="cityFilter">
+          <option>All Areas</option>
+          <option>Casa Grande</option>
+          <option>Maricopa</option>
+          <option>Apache Junction</option>
+          <option>Florence</option>
+          <option>Coolidge</option>
+          <option>Eloy</option>
+          <option>Queen Creek</option>
+          <option>San Tan Valley</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Zoning</label>
+        <select id="zoningFilter">
+          <option>All Zones</option>
+          <option>CR-1 (Single Residence)</option>
+          <option>CR-3 (Rural)</option>
+          <option>CR-4 (Mobile Home)</option>
+          <option>CR-5 (Multiple Residence)</option>
+          <option>GR (General Rural)</option>
+          <option>SR (Suburban Ranch)</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Wait for DOM + a tiny buffer so Leaflet sees the map div
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('preloader').classList.add('fade');
         setTimeout(() => {
           document.body.classList.add('ready');
-
-          // Initialize map only after everything is visible
-          const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 12);
-
-          // ESRI World Imagery – high-res satellite, free, no key
-          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Esri, Maxar, Earthstar Geographics',
-            maxZoom: 22
-          }).addTo(map);
-
-          L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-          // Fix Leaflet size after reveal
-          setTimeout(() => map.invalidateSize(), 100);
+          initMap();
         }, 1600);
       }, 100);
     });
+
+    function initMap() {
+      const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
+
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Esri, Maxar',
+        maxZoom: 22
+      }).addTo(map);
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      setTimeout(() => map.invalidateSize(), 200);
+    }
   </script>
 </body>
 </html>

@@ -49,48 +49,4 @@
     <svg class="mountain" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
       <path d="M0 210 L200 70 L400 210 Z" fill="#222"/>
       <path d="M0 210 L200 90 L400 210 Z" fill="#444"/>
-      <path d="M100 210 L200 120 L300 210 Z" fill="#999"/>
-      <path d="M140 210 L200 150 L260 210 Z" fill="#fff"/>
-    </svg>
-  </div>
-
-  <div id="main">
-    <div id="map"></div>
-    <div class="title-box">
-      <h2>LANDORIX</h2>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    setTimeout(() => {
-      document.getElementById('preloader').classList.add('fade');
-      setTimeout(() => {
-        document.body.classList.add('ready');
-        setTimeout(() => map.invalidateSize(), 100);
-      }, 1600);
-    }, 3000);
-
-    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 10);
-    
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '©OpenStreetMap ©CartoDB'
-    }).addTo(map);
-
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    // OFFICIAL PINAL COUNTY PARCEL BOUNDARIES — EXACTLY LIKE ASSESSOR VIEWER
-    L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      opacity: 0.3
-    }).addTo(map);
-
-    L.tileLayer('https://gis.pinalcountyaz.gov/arcgis/rest/services/Parcels/Parcels/MapServer/tile/{z}/{y}/{x}', {
-      layers: '0',
-      format: 'image/png',
-      transparent: true,
-      opacity: 1,
-      attribution: 'Pinal County Assessor'
-    }).addTo(map).bringToFront();
-  </script>
-</body>
-</html>
+      <path d="M100

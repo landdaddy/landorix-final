@@ -1,49 +1,44 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
+import Globe from './Globe';
 
 export default function App() {
-  const canvasRef = useRef(null);
+  const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let angle = 0;
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Spinning Earth circle
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, 200, 0, 2 * Math.PI);
-      ctx.fillStyle = '#1e3a8a'; // Blue Earth
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      angle += 0.02;
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(angle);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Pinal County', 0, 250);
-      ctx.restore();
-
-      requestAnimationFrame(draw);
-    };
-    draw();
-
-    // Fade loader (static HTML will hide after 3 seconds via CSS, but this ensures)
-    setTimeout(() => {
-      canvas.style.opacity = '1';
-    }, 3000);
-
+    const timer = setTimeout(() => setShowLoader(false), 3000); // 3 seconds
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} style={{ opacity: 0, transition: 'opacity 1s' }} />
+    <>
+      {showLoader && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#000',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#fff',
+          fontSize: '4rem',
+          letterSpacing: '0.3em',
+          pointerEvents: 'none' // lets mouse through after fade
+        }}>
+          LANDORIX
+          <div style={{
+            marginTop: '40px',
+            width: '80px',
+            height: '80px',
+            border: '4px solid rgba(255,255,255,0.2)',
+            borderTop: '4px solid #fff',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+        </div>
+      )}
+      <Globe />
+    </>
   );
 }

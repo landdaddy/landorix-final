@@ -2,24 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Landorix</title>
   <style>
-    body,html{margin:0;height:100vh;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;overflow:hidden}
-    h1{font-size:5rem;letter-spacing:0.4em;font-weight:300;text-transform:uppercase;animation:fadeIn 2s}
-    .mountain{animation:mountain 4s infinite linear}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes mountain{
-      0%   {transform:translateY(0)}
-      50%  {transform:translateY(-20px)}
-      100% {transform:translateY(0)}
+    body, html { margin:0; height:100%; background:#000; overflow:hidden; }
+    
+    #preloader {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.8s ease;
     }
+    #preloader.fade-out { opacity: 0; pointer-events: none; }
+
+    #preloader h1 {
+      font-size: 4rem;
+      letter-spacing: 0.5rem;
+      margin: 0 0 40px 0;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #main-content { display:.none; background: #111; color: #fff; min-height:100vh; padding: 40px; }
   </style>
 </head>
 <body>
-  <h1>LANDORIX</h1>
-  <svg class="mountain" width="200" height="120" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0 120 L100 20 L200 120 Z" fill="#fff"/>
-  </svg>
+
+  <!-- THIS IS THE LOADER THAT WILL DISAPPEAR AFTER 3 SECONDS -->
+  <div id="preloader">
+    <h1>LANDORIX</h1>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- YOUR REAL WEBSITE STARTS HERE (currently just a placeholder) -->
+  <div id="main-content">
+    <h1 style="text-align:center; margin-top:100px;">Welcome to Landorix</h1>
+    <p style="text-align:center; font-size:1.5rem;">Site loading complete – let’s keep building!</p>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      const preloader = document.getElementById('preloader');
+      preloader.classList.add('fade-out');
+      setTimeout(() => preloader.style.display = 'none', 800);
+      document.getElementById('main-content').style.display = 'block';
+    }, 3000); // 3000 ms = 3 seconds
+  </script>
 </body>
 </html>

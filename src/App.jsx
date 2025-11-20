@@ -5,8 +5,7 @@ export default function App() {
   const [showLoader, setShowLoader] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowLoader(false), 3000);
-    return () => clearTimeout(timer);
+    setTimeout(() => setShowLoader(false), 3000);
   }, []);
 
   return (
@@ -18,7 +17,7 @@ export default function App() {
           color: '#fff', fontSize: '4rem', letterSpacing: '0.3em'
         }}>
           LANDORIX
-          <div style={{ marginTop: '40px', width: '80px', height: '80px', border: '4px solid rgba(255,255,255,0.2)', borderTop: '4px solid #fff', borderRadius: '50%', animation: 's 1s linear infinite' }} />
+          <div style={{ marginTop: '40px', width: '80px', height: '80px', border: '4px solid rgba(255,255,255,0.2)', borderTop: '4px solid #fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
         </div>
       )}
       <Globe />

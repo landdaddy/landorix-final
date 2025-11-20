@@ -19,19 +19,26 @@
 
     h1 {
       font-size:7rem; letter-spacing:0.6rem; margin-bottom:40px;
-      background:linear-gradient(90deg, #fff, #aaa);
-      -webkit-background-clip:text; background-clip:text;
-      -webkit-text-fill-color:transparent;
+      color: #fff; /* Pure white, no gradient BS */
+      text-shadow: 0 0 20px rgba(255,255,255,0.5); /* Glow for visibility */
     }
 
-    .mountain { width:340px; height:180px; animation:float 6s ease-in-out infinite; }
-    @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-30px); } }
+    .mountain { 
+      width:340px; height:180px; 
+      animation:float 6s ease-in-out infinite; 
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); /* Glow outline so it's not lost on black */
+    }
+    @keyframes float { 
+      0%,100% { transform:translateY(0); } 
+      50% { transform:translateY(-30px); } 
+    }
 
     #main {
       display:none; min-height:100vh; background:#000; color:#fff;
-      display:grid; place-items:center; text-align:center; font-size:2rem;
+      padding:40px; text-align:center; font-size:2rem;
     }
-    body.ready #main { display:grid; }
+    body.ready #main { display:block; }
+    body.ready #preloader { display:none; }
   </style>
 </head>
 <body>
@@ -39,24 +46,27 @@
   <div id="preloader">
     <h1>LANDORIX</h1>
     <svg class="mountain" viewBox="0 0 340 180" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 180 L170 60 L340 180 Z" fill="#111"/>
-      <path d="M0 180 L170 80 L340 180 Z" fill="#333"/>
-      <path d="M85 180 L170 100 L255 180 Z" fill="#777"/>
-      <path d="M120 180 L170 120 L220 180 Z" fill="#bbb"/>
+      <path d="M0 180 L170 60 L340 180 Z" fill="#666"/> <!-- Light gray base -->
+      <path d="M0 180 L170 80 L340 180 Z" fill="#999"/> <!-- Lighter gray -->
+      <path d="M85 180 L170 100 L255 180 Z" fill="#ccc"/> <!-- Even lighter -->
+      <path d="M120 180 L170 120 L220 180 Z" fill="#fff"/> <!-- White peak for pop -->
     </svg>
   </div>
 
   <div id="main">
-    <div style="color:#666;">
-      LANDORIX IS READY<br><br>
-      <span style="font-size:1rem;">Loader fixed forever. Tell me what you want next.</span>
+    <div style="color:#fff; margin-top:100px;">
+      <h2 style="font-size:3rem; color:#fff;">LANDORIX IS READY</h2>
+      <p style="font-size:1.2rem; color:#ccc;">Loader fixed. Full text visible. Mountains glow. What feature next?</p>
     </div>
   </div>
 
   <script>
     setTimeout(() => {
-      document.getElementById('preloader').classList.add('fade');
-      setTimeout(() => document.body.classList.add('ready'), 1200);
+      const loader = document.getElementById('preloader');
+      loader.classList.add('fade');
+      setTimeout(() => {
+        document.body.classList.add('ready');
+      }, 1200);
     }, 3000);
   </script>
 </body>

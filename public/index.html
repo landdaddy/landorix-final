@@ -54,50 +54,32 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Loader
-      setTimeout(() => {
-    document.getElementById('preloader').classList.add('fade');
+    // Loader + map fix
     setTimeout(() => {
-      document.body.classList.add('ready');
-      // Fix Leaflet size bug when map appears after being hidden
-      setTimeout(() => map.invalidateSize(), 100);
-    }, 1600);
-  }, 3000);
+      document.getElementById('preloader').classList.add('fade');
+      setTimeout(() => {
+        document.body.classList.add('ready');
+        setTimeout(() => map.invalidateSize(), 100);  // fixes first-load bug
+      }, 1600);
+    }, 3000);
+
+    // Map – Pinal County
     const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 10);
     
-    // Dark base tiles
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '©OpenStreetMap ©CartoDB'
     }).addTo(map);
 
-    // Zoom control bottom-right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // OFFICIAL Pinal County parcel layer – works 100%
-    const parcels = L.tileLayer.wms('https://gis.pinal.gov/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}', {
+    // Official Pinal County parcels – clean and simple
+    L.tileLayer.wms('https://gis.pinal.gov/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}', {
       layers: '0',
       format: 'image/png',
       transparent: true,
+      opacity: 0.6,
       attribution: 'Pinal County GIS'
     }).addTo(map);
-
-    // Fluorescent white glow when zoomed in
-    map.on('zoomend', () => {
-      const z = map.getZoom();
-      if (z >= 16) {
-        parcels.setOpacity(0.9);
-        document.querySelectorAll('.leaflet-tile-pane img').forEach(img => {
-          img.style.filter = 'brightness(0) invert(1) drop-shadow(0 0 12px #fff)';
-          img.style.mixBlendMode = 'screen';
-        });
-      } else {
-        parcels.setOpacity(0.5);
-        document.querySelectorAll('.leaflet-tile-pane img').forEach(img => {
-          img.style.filter = 'none';
-          img.style.mixBlendMode = 'normal';
-        });
-      }
-    });
   </script>
 </body>
 </html>

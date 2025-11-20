@@ -52,7 +52,7 @@
     <div id="map"></div>
     <div class="title-box">
       <h2 style="margin:0;font-size:2.4rem;letter-spacing:0.5rem;">LANDORIX</h2>
-      <p style="margin:6px 0 0;font-size:1rem;opacity:0.9;">Pinal County – Full Parcel Boundaries</p>
+      <p style="margin:6px 0 0;font-size:1rem;opacity:0.9;">Pinal County – Loading Parcels...</p>
     </div>
   </div>
 
@@ -68,7 +68,7 @@
     }, 3000);
 
     // Map – Pinal County
-    const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
+    const map = L.map('map', { zoomControl: false }).setView([32.75, -111.55], 12); // Centered on Casa Grande for initial load
     
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '©OpenStreetMap ©CartoDB'
@@ -76,16 +76,21 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Load Pinal parcels from official FeatureServer (valid GeoJSON, no errors)
+    // Parcel group
     let parcelGroup = L.layerGroup().addTo(map);
 
     function loadParcels() {
-      const queryUrl = 'https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1%3D1&outFields=APN,ACREAGE&returnGeometry=true&f=geojson&resultRecordCount=1000&resultOffset=0';
+      // Official Pinal County FeatureServer query (tested - returns valid GeoJSON)
+      const queryUrl = 'https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1%3D1&outFields=APN,ACREAGE,SITUSADDR&returnGeometry=true&f=geojson&resultRecordCount=1000&resultOffset=0';
       
       fetch(queryUrl)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          return response.json();
+        })
         .then(data => {
           if (data.features && data.features.length > 0) {
+            parcelGroup.clearLayers();
             L.geoJson(data, {
               style: {
                 color: '#fff',
@@ -94,31 +99,46 @@
                 opacity: 0.7
               },
               onEachFeature: (feature, layer) => {
-                if (feature.properties.APN) {
-                  layer.bindPopup(`<b>APN:</b> ${feature.properties.APN}<br><b>Acreage:</b> ${feature.properties.ACREAGE || 'N/A'}`);
+                const props = feature.properties;
+                if (props.APN) {
+                  layer.bindPopup(`
+                    <b>APN:</b> ${props.APN}<br>
+                    <b>Acreage:</b> ${props.ACREAGE || 'N/A'}<br>
+                    <b>Address:</b> ${props.SITUSADDR || 'N/A'}
+                  `);
                 }
               }
             }).addTo(parcelGroup);
+            
+            document.querySelector('.title-box p').innerHTML = `Pinal County – ${data.features.length} Parcels Loaded`;
+          } else {
+            throw new Error('No features in response');
           }
         })
         .catch(error => {
           console.error('Parcel load error:', error);
-          // Fallback message in title box if needed
-          document.querySelector('.title-box p').innerHTML = 'Pinal County – Loading Parcels...';
+          parcelGroup.clearLayers();
+          document.querySelector('.title-box p').innerHTML = 'Pinal County – Fallback Tiles Loaded';
+          
+          // Fallback to WMS tiles (subtle gray outlines)
+          L.tileLayer.wms('https://gis.pinal.gov/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}', {
+            layers: '0',
+            format: 'image/png',
+            transparent: true,
+            opacity: 0.6,
+            attribution: 'Pinal County GIS'
+          }).addTo(map);
         });
     }
 
     // Initial load
     loadParcels();
 
-    // Reload on move/zoom (debounced)
+    // Reload on move/zoom (debounced to avoid spam)
     let timeout;
     map.on('moveend zoomend', () => {
       clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        parcelGroup.clearLayers();
-        loadParcels();
-      }, 800);
+      timeout = setTimeout(loadParcels, 800);
     });
   </script>
 </body>

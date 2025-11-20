@@ -62,7 +62,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/@esri/leaflet-esriapi@3.1.3/dist/esri-leaflet.js"></script>
   <script>
     setTimeout(() => {
       document.getElementById('preloader').classList.add('fade');
@@ -80,24 +79,18 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // OFFICIAL PINAL COUNTY ASSESSOR PARCELS FROM OPEN DATA PORTAL – CRISP OUTLINES LIKE VIEWER
-    L.esri.featureLayer({
-      url: 'https://gis.pinal.gov/mapping/rest/services/TaxParcels/FeatureServer/3',
-      simplifyFactor: 1,
-      precision: 6,
-      style: function (feature) {
-        return {
-          color: '#fff',
-          weight: 1.5,
-          fillOpacity: 0
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        if (feature.properties.APN) {
-          layer.bindPopup('<b>APN:</b> ' + feature.properties.APN + '<br><b>Acreage:</b> ' + (feature.properties.ACREAGE || 'N/A'));
-        }
-      }
+    // OFFICIAL PINAL COUNTY PARCEL BOUNDARIES — EXACTLY LIKE ASSESSOR VIEWER
+    L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      opacity: 0.3
     }).addTo(map);
+
+    L.tileLayer('https://gis.pinalcountyaz.gov/arcgis/rest/services/Parcels/Parcels/MapServer/tile/{z}/{y}/{x}', {
+      layers: '0',
+      format: 'image/png',
+      transparent: true,
+      opacity: 1,
+      attribution: 'Pinal County Assessor'
+    }).addTo(map).bringToFront();
   </script>
 </body>
 </html>

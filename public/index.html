@@ -55,12 +55,14 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // Loader
+      setTimeout(() => {
+    document.getElementById('preloader').classList.add('fade');
     setTimeout(() => {
-      document.getElementById('preloader').classList.add('fade');
-      setTimeout(() => document.body.classList.add('ready'), 1500);
-    }, 3000);
-
-    // Map – Pinal County
+      document.body.classList.add('ready');
+      // Fix Leaflet size bug when map appears after being hidden
+      setTimeout(() => map.invalidateSize(), 100);
+    }, 1600);
+  }, 3000);
     const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 10);
     
     // Dark base tiles

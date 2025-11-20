@@ -17,21 +17,9 @@
     }
     #preloader.fade{opacity:0;}
     
-    h1{
-      font-size:clamp(3rem, 12vw, 8rem);
-      font-weight:300;
-      letter-spacing:0.8rem;
-      color:#fff;
-      text-shadow:0 0 40px rgba(255,255,255,0.6);
-      margin-bottom:2vh;
-    }
-    .mountain{
-      width:clamp(200px, 80vw, 420px);
-      height:auto;
-      animation:float 7s ease-in-out infinite;
-      filter:drop-shadow(0 0 25px rgba(255,255,255,0.4));
-    }
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+    h1{font-size:clamp(3rem,12vw,8rem);font-weight:300;letter-spacing:0.8rem;color:#fff;text-shadow:0 0 40px rgba(255,255,255,0.6);margin-bottom:2vh;}
+    .mountain{width:clamp(200px,80vw,420px);height:auto;animation:float 7s ease-in-out infinite;filter:drop-shadow(0 0 25px rgba(255,255,255,0.4));}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-35px)}}
 
     #main{display:none;height:100%;}
     body.ready #main{display:block;}
@@ -40,37 +28,12 @@
     #map{height:100%;width:100%;}
 
     .title-box{
-      position:absolute;
-      top:env(safe-area-inset-top, 10px);
-      top:constant(safe-area-inset-top, 10px);
-      top:10px;
-      left:10px;
-      right:10px;
-      max-width:90%;
-      background:rgba(0,0,0,0.85);
-      padding:12px 20px;
-      border-radius:12px;
-      backdrop-filter:blur(12px);
-      border:1px solid rgba(255,255,255,0.1);
-      z-index:1000;
-      text-align:center;
+      position:absolute;top:env(safe-area-inset-top,15px);left:50%;transform:translateX(-50%);
+      background:rgba(0,0,0,0.85);padding:12px 30px;border-radius:12px;
+      backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);z-index:1000;text-align:center;
     }
-    .title-box h2{
-      font-size:clamp(1.8rem, 6vw, 2.8rem);
-      letter-spacing:0.4rem;
-      margin:0;
-    }
-    .title-box p{
-      font-size:clamp(0.9rem, 3vw, 1.1rem);
-      margin:6px 0 0;
-      opacity:0.9;
-    }
-
-    .leaflet-control-zoom{
-      bottom:env(safe-area-inset-bottom, 20px) !important;
-      bottom:constant(safe-area-inset-bottom, 20px) !important;
-      right:10px !important;
-    }
+    .title-box h2{font-size:clamp(1.8rem,6vw,2.8rem);letter-spacing:0.4rem;margin:0;}
+    .title-box p{font-size:clamp(0.9rem,3vw,1.1rem);margin:6px 0 0;opacity:0.9;}
   </style>
 </head>
 <body>
@@ -111,31 +74,14 @@
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    let parcelGroup = L.layerGroup().addTo(map);
-
-    function loadParcels() {
-      const url = 'https://rogue.casagrandeaz.gov/arcgis/rest/services/Pinal_County/Pinal_County_Parcels/MapServer/0/query?where=1=1&outFields=APN,ACREAGE,SITUSADDR&returnGeometry=true&f=geojson&resultRecordCount=1500';
-      
-      fetch(url)
-        .then(r => r.json())
-        .then(data => {
-          parcelGroup.clearLayers();
-          L.geoJson(data, {
-            style: { color: '#fff', weight: 1.5, fill: false, opacity: 0.8 },
-            onEachFeature: (f, l) => {
-              const p = f.properties;
-              l.bindPopup(`<b>APN:</b> ${p.APN}<br><b>Acreage:</b> ${p.ACREAGE||'N/A'}<br><b>Address:</b> ${p.SITUSADDR||'N/A'}`);
-            }
-          }).addTo(parcelGroup);
-          document.querySelector('.title-box p').textContent = `Pinal County – ${data.features.length} Parcels Loaded`;
-        })
-        .catch(() => {
-          document.querySelector('.title-box p').textContent = 'Pinal County – Using Fallback Tiles';
-        });
-    }
-
-    loadParcels();
-    let t; map.on('moveend zoomend', () => { clearTimeout(t); t = setTimeout(loadParcels, 700); });
+    // THIS IS THE EXACT SAME LAYER THE OFFICIAL ASSESSOR VIEWER USES
+    L.tileLayer('https://gis.pinal.gov/arcgis/rest/services/Parcels/MapServer/tile/{z}/{y}/{x}', {
+      layers: '0',
+      format: 'image/png',
+      transparent: true,
+      opacity: 1,
+      attribution: 'Pinal County Assessor'
+    }).addTo(map).bringToFront();
   </script>
 </body>
 </html>

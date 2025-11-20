@@ -9,14 +9,18 @@
   <meta property="og:image" content="https://landorix.com/preview.jpg">
   <meta property="og:url" content="https://landorix.com">
   <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Sharp futuristic font for header -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;background:#000;color:#fff;font-family:'Exo 2',sans-serif;overflow:hidden;}
 
-    /* === PRELOADER – untouched & beautiful === */
-    #preloader{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.8s ease-out;}
+    /* PRELOADER – untouched */
+    #preloader{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.8s;}
     #preloader.fade{opacity:0;pointer-events:none;}
     h1{font-size:clamp(4rem,14vw,10rem);font-weight:700;letter-spacing:0.8rem;color:#fff;text-shadow:0 0 60px rgba(255,255,255,0.9);}
     .mountain{width:clamp(200px,80vw,420px);animation:float 7s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,255,255,0.5));}
@@ -26,84 +30,81 @@
     body.ready #preloader{display:none;}
     #map{height:100%;width:100%;}
 
-    /* === HEADER === */
+    /* SHARP HEADER – no blur, pure black */
     .title-bar{
       position:fixed;top:0;left:0;right:0;height:86px;
-      background:linear-gradient(to bottom,rgba(0,0,0,0.92),transparent);
+      background:#000;
+      border-bottom:1px solid rgba(255,255,255,0.12);
       display:flex;align-items:center;justify-content:space-between;
       padding:0 36px;z-index:1000;
-      backdrop-filter:blur(14px);
     }
     .title-bar h2{
-      font-size:2.9rem;font-weight:700;letter-spacing:0.58rem;color:#fff;
+      font-family:'Orbitron',sans-serif;
+      font-weight:700;
+      font-size:2.9rem;
+      letter-spacing:0.65rem;
+      color:#fff;
     }
 
-    /* === HAMBURGER (mobile only) === */
-    .hamburger{display:none;cursor:pointer;width:30px;height:22px;position:relative;}
-    .hamburger span{background:#fff;height:1.5px;width:100%;position:absolute;left:0;transition:all .35s ease;}
+    /* HAMBURGER – mobile only */
+    .hamburger{display:none;cursor:pointer;width:32px;height:24px;position:relative;}
+    .hamburger span{background:#fff;height:2px;width:100%;position:absolute;left:0;transition:all .35s;}
     .hamburger span:nth-child(1){top:0;}
-    .hamburger span:nth-child(2){top:10px;}
-    .hamburger span:nth-child(3){top:20px;}
-    .hamburger.active span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger span:nth-child(2){top:11px;}
+    .hamburger span:nth-child(3){top:22px;}
+    .hamburger.active span:nth-child(1){transform:rotate(45deg);top:11px;}
     .hamburger.active span:nth-child(2){opacity:0;}
-    .hamburger.active span:nth-child(3){transform:rotate(-45deg);top:10px;}
+    .hamburger.active span:nth-child(3){transform:rotate(-45deg);top:11px;}
 
-    /* === DESKTOP FILTER BAR – centered, ultra-minimal === */
+    /* DESKTOP FILTERS – sharp & centered */
     .desktop-filters{
       position:fixed;top:100px;left:50%;transform:translateX(-50%);
-      display:flex;align-items:center;gap:40px;
-      background:rgba(15,15,15,0.7);backdrop-filter:blur(20px);
-      border:1px solid rgba(255,255,255,0.18);padding:16px 32px;
+      display:flex;align-items:center;gap:42px;
+      background:rgba(10,10,10,0.85);
+      border:1px solid rgba(255,255,255,0.2);
+      padding:16px 36px;
       z-index:900;
     }
     .desktop-filters label{
-      font-size:0.68rem;letter-spacing:0.08rem;color:rgba(255,255,255,0.55);display:block;margin-bottom:6px;
+      font-size:0.7rem;letter-spacing:0.08rem;color:rgba(255,255,255,0.55);display:block;margin-bottom:6px;
     }
-    .desktop-filters input,
-    .desktop-filters select{
-      background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.4);
-      color:#fff;font-size:0.95rem;padding:6px 0;width:120px;transition:border-color .3s;
+    .desktop-filters input,.desktop-filters select{
+      background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.45);
+      color:#fff;font-size:0.95rem;padding:6px 0;width:124px;transition:.3s;
     }
-    .desktop-filters input:focus,
-    .desktop-filters select:focus{
+    .desktop-filters input:focus,.desktop-filters select:focus{
       outline:none;border-bottom-color:#fff;
     }
-    .divider{width:1px;height:40px;background:rgba(255,255,255,0.22);}
+    .divider{width:1px;height:42px;background:rgba(255,255,255,0.22);}
 
-    /* === MOBILE FILTER PANEL === */
+    /* MOBILE FILTER PANEL – hamburger menu */
     .mobile-filters{
       position:fixed;top:0;right:0;height:100%;width:340px;
-      background:rgba(8,8,8,0.98);backdrop-filter:blur(24px);
+      background:#000;
       border-left:1px solid rgba(255,255,255,0.15);
       padding:110px 40px 40px;z-index:999;
-      transform:translateX(100%);transition:transform .45s cubic-bezier(0.22,1,0.36,1);
+      transform:translateX(100%);transition:transform .45s ease;
     }
     .mobile-filters.open{transform:translateX(0);}
     .mobile-filters h3{
-      font-size:1.7rem;margin-bottom:36px;letter-spacing:0.25rem;color:#fff;
+      font-family:'Orbitron',sans-serif;
+      font-size:1.8rem;letter-spacing:0.3rem;margin-bottom:40px;
     }
-    .mobile-filters .filter-group{margin-bottom:32px;}
     .mobile-filters label{
-      font-size:0.82rem;color:rgba(255,255,255,0.6);display:block;margin-bottom:10px;
+      font-size:0.85rem;color:rgba(255,255,255,0.6);display:block;margin-bottom:10px;
     }
-    .mobile-filters input,
-    .mobile-filters select{
+    .mobile-filters input,.mobile-filters select{
       width:100%;background:transparent;border:none;
-      border-bottom:1px solid rgba(255,255,255,0.4);
-      color:#fff;padding:10px 0;font-size:1.15rem;
-    }
-    .mobile-filters input:focus,
-    .mobile-filters select:focus{
-      outline:none;border-bottom-color:#fff;
+      border-bottom:1px solid rgba(255,255,255,0.45);
+      color:#fff;padding:12px 0;font-size:1.2rem;
     }
 
-    /* === RESPONSIVE === */
-    @media (max-width: 1023px){
+    @media (max-width:1023px){
       .hamburger{display:block;}
       .desktop-filters{display:none;}
     }
-    @media (min-width: 1024px){
-      .mobile-filters{display:none !important;}
+    @media (min-width:1024px){
+      .mobile-filters{display:none!important;}
     }
   </style>
 </head>
@@ -133,19 +134,12 @@
 
     <!-- DESKTOP FILTERS -->
     <div class="desktop-filters">
-      <div>
-        <label>MIN ACRES</label>
-        <input type="number" id="minAcresDesk" placeholder="0" value="5">
-      </div>
+      <div><label>MIN ACRES</label><input type="number" placeholder="0" value="5"></div>
       <div class="divider"></div>
-      <div>
-        <label>MAX ACRES</label>
-        <input type="number" id="maxAcresDesk" placeholder="No limit">
-      </div>
+      <div><label>MAX ACRES</label><input type="number" placeholder="No limit"></div>
       <div class="divider"></div>
-      <div>
-        <label>CITY / AREA</label>
-        <select id="cityFilterDesk">
+      <div><label>CITY / AREA</label>
+        <select>
           <option value="">All Areas</option>
           <option>Casa Grande</option>
           <option>Maricopa</option>
@@ -158,23 +152,20 @@
         </select>
       </div>
       <div class="divider"></div>
-      <div>
-        <label>ZONING</label>
-        <select id="zoningFilterDesk"><option value="">All Zones</option></select>
-      </div>
+      <div><label>ZONING</label><select><option value="">All Zones</option></select></div>
     </div>
 
-    <!-- MOBILE FILTERS -->
+    <!-- MOBILE HAMBURGER MENU -->
     <div class="mobile-filters" id="mobileFilters">
       <h3>FILTERS</h3>
-      <div class="filter-group">
+      <div style="margin-bottom:32px;">
         <label>Parcel Size (acres)</label>
-        <input type="number" id="minAcres" placeholder="Min" value="5" style="margin-bottom:16px;">
-        <input type="number" id="maxAcres" placeholder="Max">
+        <input type="number" placeholder="Min" value="5" style="margin-bottom:16px;">
+        <input type="number" placeholder="Max">
       </div>
-      <div class="filter-group">
+      <div style="margin-bottom:32px;">
         <label>City / Area</label>
-        <select id="cityFilter">
+        <select>
           <option value="">All Areas</option>
           <option>Casa Grande</option>
           <option>Maricopa</option>
@@ -186,16 +177,29 @@
           <option>San Tan Valley</option>
         </select>
       </div>
-      <div class="filter-group">
+      <div>
         <label>Zoning</label>
-        <select id="zoningFilter"><option value="">All Zones</option></select>
+        <select><option value="">All Zones</option></select>
       </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Preloader
+    const hamburger = document.getElementById('hamburger');
+    const mobileFilters = document.getElementById('mobileFilters');
+    hamburger.addEventListener('click', e => {
+      e.stopPropagation();
+      hamburger.classList.toggle('active');
+      mobileFilters.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      mobileFilters.classList.remove('open');
+    });
+    mobileFilters.addEventListener('click', e => e.stopPropagation());
+
+    // Preloader → map
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('preloader').classList.add('fade');
@@ -206,22 +210,6 @@
       }, 100);
     });
 
-    // Hamburger
-    const hamburger = document.getElementById('hamburger');
-    const mobileFilters = document.getElementById('mobileFilters');
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      hamburger.classList.toggle('active');
-      mobileFilters.classList.toggle('open');
-    });
-    // Close on outside click
-    document.addEventListener('click', () => {
-      hamburger.classList.remove('active');
-      mobileFilters.classList.remove('open');
-    });
-    mobileFilters.addEventListener('click', e => e.stopPropagation());
-
-    // Map
     function initMap() {
       const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {

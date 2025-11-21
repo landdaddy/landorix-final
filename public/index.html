@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LANDORIX – Pinal County Land Intelligence</title>
   <meta property="og:title" content="LANDORIX">
-  <meta property="og:description" content="Pinal County land intelligence — satellite view.">
+  <meta property="og:description" content="Pinal County zoning + parcels — satellite view.">
   <meta property="og:image" content="https://landorix.com/preview.jpg">
   <meta property="og:url" content="https://landorix.com">
   <meta name="twitter:card" content="summary_large_image">
@@ -178,7 +178,7 @@
     document.addEventListener('click', () => { hamburger.classList.remove('active'); drawer.classList.remove('open'); });
     drawer.addEventListener('click', e => e.stopPropagation());
 
-    let parcelLayer;
+    let zoningLayer;
     function initMap() {
       const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -186,43 +186,29 @@
       }).addTo(map);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      function loadParcels() {
+      function loadZoning() {
         const bounds = map.getBounds();
         const bbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
-        const search = (document.getElementById('parcelSearch')?.value || '').trim();
 
-        let url = `https://gis.pinal.gov/arcgis/rest/services/Maps/Assessor_Parcels/MapServer/0/query?f=geojson&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=${encodeURIComponent(bbox)}&geometryType=esriGeometryEnvelope&outFields=PARCEL_ID,OWNER_NAME,SITUS_ADDR,TOTAL_VALUE,ZONING&outSR=4326`;
-
-        if (search.length >= 2) {
-          url = `https://gis.pinal.gov/arcgis/rest/services/Maps/Assessor_Parcels/MapServer/0/query?f=geojson&where=PARCEL_ID+LIKE+%27%25${search}%25%27+OR+OWNER_NAME+LIKE+%27%25${search}%25%27+OR+SITUS_ADDR+LIKE+%27%25${search}%25%27&outFields=PARCEL_ID,OWNER_NAME,SITUS_ADDR,TOTAL_VALUE,ZONING&outSR=4326`;
-        }
+        const url = `https://gis.pinal.gov/arcgis/rest/services/Maps/Zoning/MapServer/0/query?f=geojson&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=${encodeURIComponent(bbox)}&geometryType=esriGeometryEnvelope&outFields=ZONING_CODE,DESCRIPTION&outSR=4326`;
 
         axios.get(url).then(res => {
-          if (parcelLayer) map.removeLayer(parcelLayer);
-          parcelLayer = L.geoJSON(res.data, {
-            style: { color: "#ffffff", weight: 1.4, fillOpacity: 0.07 },
+          if (zoningLayer) map.removeLayer(zoningLayer);
+          zoningLayer = L.geoJSON(res.data, {
+            style: { color: "#00ffaa", weight: 2, opacity: 0.8, fillOpacity: 0.1 },
             onEachFeature: (feature, layer) => {
               const p = feature.properties;
               layer.bindPopup(`
-                <strong>Parcel ID:</strong> ${p.PARCEL_ID || '—'}<br>
-                <strong>Owner:</strong> ${p.OWNER_NAME || '—'}<br>
-                <strong>Address:</strong> ${p.SITUS_ADDR || '—'}<br>
-                <strong>Total Value:</strong> $${(p.TOTAL_VALUE || 0).toLocaleString()}<br>
-                <strong>Zoning:</strong> ${p.ZONING || '—'}
+                <strong>Zoning:</strong> ${p.ZONING_CODE || '—'}<br>
+                <strong>Description:</strong> ${p.DESCRIPTION || '—'}
               `);
             }
           }).addTo(map);
         }).catch(() => {});
       }
 
-      map.on('moveend zoomend', loadParcels);
-      document.getElementById('parcelSearch')?.addEventListener('input', () => {
-        if (document.getElementById('parcelSearch').value.length >= 2 || document.getElementById('parcelSearch').value === '') {
-          loadParcels();
-        }
-      });
-
-      setTimeout(() => { map.invalidateSize(); loadParcels(); }, 500);
+      map.on('moveend zoomend', loadZoning);
+      setTimeout(() => { map.invalidateSize(); loadZoning(); }, 500);
     }
   </script>
 </body>

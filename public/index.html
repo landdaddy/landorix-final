@@ -1,98 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LANDORIX – Pinal County Land Intelligence</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LANDORIX</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap">
+  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    html,body{height:100%;background:#000;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;}
-    #preloader{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.6s ease-out;}
-    #preloader.fade{opacity:0;pointer-events:none;}
-    #preloader h1{font-size:clamp(3.2rem,11vw,7rem);font-weight:700;letter-spacing:0.6rem;color:#fff;text-shadow:0 0 40px rgba(255,255,255,0.6);}
-    .mountain{width:clamp(160px,58vw,280px);max-width:88vw;margin-top:32px;animation:float 7s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(255,255,255,0.35));}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
-    #main{display:none;height:100%;}body.ready #main{display:block;}body.ready #preloader{display:none;}#map{height:100%;width:100%;}
-    header{position:fixed;top:0;left:0;right:0;height:76px;background:#000;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;z-index:1000;}
-    header h1{font-size:2.2rem;font-weight:600;letter-spacing:0.5rem;color:#fff;}
-    .hamburger{position:absolute;right:28px;top:50%;transform:translateY(-50%);width:30px;height:22px;cursor:pointer;}
-    .hamburger span{background:#fff;height:1.8px;width:100%;position:absolute;left:0;transition:all .35s ease;}
-    .hamburger span:nth-child(1){top:2px;}.hamburger span:nth-child(2){top:11px;}.hamburger span:nth-child(3){top:20px;}
-    .hamburger.active span:nth-child(1){transform:rotate(45deg);top:11px;}.hamburger.active span:nth-child(2){opacity:0;}.hamburger.active span:nth-child(3){transform:rotate(-45deg);top:11px;}
-    .drawer{position:fixed;top:0;right:0;height:100%;width:340px;max-width:90vw;background:#000;border-left:1px solid rgba(255,255,255,0.12);padding:100px 40px 40px;z-index:999;transform:translateX(100%);transition:transform .42s ease;}
-    .drawer.open{transform:translateX(0);}
-    .drawer h2{font-size:1.7rem;font-weight:600;letter-spacing:0.2rem;margin-bottom:36px;}
-    .drawer label{display:block;font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:10px;}
-    .drawer input,.drawer select{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.35);color:#fff;padding:14px 0;font-size:1.15rem;}
-    .drawer input:focus,.drawer select:focus{outline:none;border-bottom-color:#fff;}
-    @media (max-width:768px){.drawer{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:120px;}
-      .drawer h2{position:sticky;top:0;background:#000;z-index:10;padding:20px 40px 12px;margin:0 -40px 30px -40px;border-bottom:1px solid rgba(255,255,255,0.1);}}
+    body,html{margin:0;height:100%;background:#000;overflow:hidden;font-family:'Orbitron',sans-serif;color:#0f0}
+    #loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000}
+    .logo{font-size:6vw;letter-spacing:12px;text-shadow:0 0 30px #0f0}
+    .spinner{margin-top:40px;width:80px;height:80px;border:6px solid #111;border-top:6px solid #0f0;border-radius:50%;animation:s 1.5s linear infinite}
+    @keyframes s{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    #hub{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;opacity:0}
+    .title{font-size:7vw;letter-spacing:15px;margin-bottom:100px;text-shadow:0 0 40px #0f0}
+    .tools{display:flex;gap:60px;flex-wrap:wrap;justify-content:center}
+    .tool-btn{padding:30px 80px;font-size:3vw;background:transparent;border:3px solid #0f0;color:#0f0;cursor:pointer;transition:all .3s;text-shadow:0 0 20px #0f0;box-shadow:0 0 30px rgba(0,255,0,.3)}
+    .tool-btn:hover{background:#0f0;color:#000;text-shadow:none;box-shadow:0 0 50px #0f0}
+    @media(max-width:768px){.title{font-size:12vw}.tool-btn{font-size:8vw;padding:20px 40px}}
   </style>
 </head>
 <body>
-  <div id="preloader"><h1>LANDORIX</h1><svg class="mountain" viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg"><path d="M0 210 L200 70 L400 210 Z" fill="#222"/><path d="M0 210 L200 90 L400 210 Z" fill="#444"/><path d="M100 210 L200 120 L300 210 Z" fill="#999"/><path d="M140 210 L200 150 L260 210 Z" fill="#fff"/></svg></div>
-  <div id="main">
-    <div id="map"></div>
-    <header><h1>LANDORIX</h1><div class="hamburger" id="hamburger"><span></span><span></span><span></span></div></header>
-    <div class="drawer" id="drawer">
-      <h2>FILTERS</h2>
-      <div style="margin-bottom:36px;"><label>Min Acres</label><input type="number" placeholder="0"></div>
-      <div style="margin-bottom:36px;"><label>Max Acres</label><input type="number" placeholder="No limit"></div>
-      <div style="margin-bottom:36px;"><label>Search Parcel / Owner / Address</label><input type="text" id="parcelSearch" placeholder="e.g. 401- or Smith" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.4);color:white;padding:12px 0;font-size:1.1rem;"></div>
+
+  <div id="loader">
+    <div class="logo">LANDORIX</div>
+    <div class="spinner"></div>
+  </div>
+
+  <div id="hub">
+    <h1 class="title">LANDORIX</h1>
+    <div class="tools">
+      <button onclick="location.href='/gis/'" class="tool-btn">GIS MAP</button>
+      <button onclick="location.href='/subdivider/'" class="tool-btn">SUBDIVIDER</button>
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
-    window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('preloader').classList.add('fade');setTimeout(()=>{document.body.classList.add('ready');initMap();},1600);},200);});
-    const hamburger=document.getElementById('hamburger'),drawer=document.getElementById('drawer');
-    hamburger.addEventListener('click',e=>{e.stopPropagation();hamburger.classList.toggle('active');drawer.classList.toggle('open');});
-    document.addEventListener('click',()=>{hamburger.classList.remove('active');drawer.classList.remove('open');});
-    drawer.addEventListener('click',e=>e.stopPropagation());
-
-    let parcelLayer;
-    function initMap(){
-      const map=L.map('map',{zoomControl:false}).setView([32.88,-111.74],11);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri · Maxar',maxZoom:22}).addTo(map);
-      L.control.zoom({position:'bottomright'}).addTo(map);
-
-      function loadParcels(){
-        const b=map.getBounds();
-        const bbox=`${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
-        const search=(document.getElementById('parcelSearch')?.value||'').trim();
-
-        // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-        // REPLACE THIS LINE WITH YOUR REAL BACKEND URL
-        let url = `https://backend-production-xxxx.up.railway.app/taxparcels?bbox=${bbox}`;
-        // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-        if(search.length>=2) url += `&search=${encodeURIComponent(search)}`;
-
-        axios.get(url).then(r=>{
-          if(parcelLayer) map.removeLayer(parcelLayer);
-          parcelLayer=L.geoJSON(r.data,{
-            style:{color:"#ffffff",weight:1.4,fillOpacity:0.07},
-            onEachFeature:(f,l)=>{
-              const p=f.properties;
-              l.bindPopup(`
-                <strong>Parcel:</strong> ${p.parcel_id}<br>
-                <strong>Owner:</strong> ${p.owner_name}<br>
-                <strong>Address:</strong> ${p.situs_addr}<br>
-                <strong>Acres:</strong> ${p.acres}<br>
-                <strong>Value:</strong> $${Number(p.total_value).toLocaleString()}<br>
-                <strong>Zoning:</strong> ${p.zoning}
-              `);
-            }
-          }).addTo(map);
-        }).catch(()=>{});
-      }
-
-      map.on('moveend zoomend',loadParcels);
-      document.getElementById('parcelSearch')?.addEventListener('input',()=>{clearTimeout(window.st);window.st=setTimeout(loadParcels,500);});
-      setTimeout(()=>{map.invalidateSize();loadParcels();},500);
-    }
+    window onload = () => {
+      gsap.to("#loader", {opacity:0, duration:1.5, delay:2, onComplete:()=>{
+        document.getElementById("loader").style.display = 'none';
+        document.getElementById("hub").style.opacity = 1;
+        gsap.from(".tool-btn", {y:200, opacity:0, stagger:0.3, duration:1.2, ease:"elastic.out(1,0.5)"});
+      }});
+    };
   </script>
 </body>
 </html>

@@ -8,7 +8,7 @@
   <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
   <style>
     body,html{margin:0;height:100%;background:#000;overflow:hidden;font-family:'Orbitron',sans-serif;color:#0f0}
-    #loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000}
+    #loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#000;z-index:9999}
     .logo{font-size:6vw;letter-spacing:12px;text-shadow:0 0 30px #0f0}
     .spinner{margin-top:40px;width:80px;height:80px;border:6px solid #111;border-top:6px solid #0f0;border-radius:50%;animation:s 1.5s linear infinite}
     @keyframes s{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
@@ -36,12 +36,23 @@
   </div>
 
   <script>
-    window onload = () => {
-      gsap.to("#loader", {opacity:0, duration:1.5, delay:2, onComplete:()=>{
-        document.getElementById("loader").style.display = 'none';
-        document.getElementById("hub").style.opacity = 1;
-        gsap.from(".tool-btn", {y:200, opacity:0, stagger:0.3, duration:1.2, ease:"elastic.out(1,0.5)"});
-      }});
+    window.onload = () => {
+      gsap.to("#loader", {
+        opacity: 0,
+        duration: 1.5,
+        delay: 2,
+        onComplete: () => {
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("hub").style.opacity = 1;
+          gsap.from(".tool-btn", {
+            y: 200,
+            opacity: 0,
+            stagger: 0.3,
+            duration: 1.2,
+            ease: "elastic.out(1,0.5)"
+          });
+        }
+      });
     };
   </script>
 </body>

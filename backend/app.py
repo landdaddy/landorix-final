@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import json
+from psycopg import connect as psycopg_connect
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 
@@ -19,10 +19,10 @@ def get_conn():
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         raise RuntimeError("DATABASE_URL environment variable is not set")
-    # Railway gives postgres:// → psycopg2 needs postgresql://
+    # Railway gives postgres:// → psycopg3 needs postgresql://
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-    return psycopg2.connect(db_url)
+    return psycopg_connect(db_url)
 
 @app.route("/")
 def home():
@@ -46,7 +46,7 @@ def taxparcels():
         return jsonify({"error": "Invalid bbox format"}), 400
 
     conn = get_conn()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = conn.cursor(row_factory=dict_row)
 
     sql = """
         SELECT parcel_id, owner_name, situs_addr, total_value, zoning, acres,

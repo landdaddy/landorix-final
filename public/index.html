@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <title>LANDORIX</title>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -17,36 +17,89 @@
     .title{font-size:clamp(4rem,12vw,9rem);font-weight:100;letter-spacing:0.6em;color:#fff;margin-bottom:6rem}
     .tools{display:flex;gap:3rem;flex-wrap:wrap;justify-content:center}
     .tool-btn{
-      min-width:320px;padding:1.8rem 3rem;font-size:1.4rem;font-weight:300;letter-spacing:0.25em;text-transform:uppercase;
+      min-width:340px;padding:1.8rem 3rem;font-size:1.4rem;font-weight:300;letter-spacing:0.25em;text-transform:uppercase;
       background:transparent;border:1px solid #fff;color:#fff;cursor:pointer;transition:all .5s cubic-bezier(0.23,1,0.32,1);
     }
     .tool-btn:hover{border-color:#fff;background:#fff;color:#000}
+    #subdivider-card{
+      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+      background:rgba(255,255,255,.98);backdrop-filter:blur(30px);
+      padding:70px 60px;border-radius:36px;box-shadow:0 40px 100px rgba(0,0,0,.25);
+      width:520px;max-width:92vw;max-height:92vh;overflow-y:auto;z-index:100;
+      text-align:center;display:none;transition:all .6s cubic-bezier(.16,1,.3,1);
+    }
+    #subdivider-card.active{display:block}
+    #subdivider-card h1{font-size:44px;font-weight:900;margin-bottom:40px;color:#000}
+    #subdivider-card select,#subdivider-card input,#subdivider-card button{
+      width:100%;padding:20px;margin:16px 0;border:none;border-radius:18px;font-size:19px;
+    }
+    #subdivider-card select,#subdivider-card input{background:rgba(0,0,0,.05);color:#000}
+    #subdivider-card button{
+      background:#000;color:#fff;font-weight:700;cursor:pointer;
+      box-shadow:0 12px 40px rgba(0,0,0,.25);margin-top:30px;
+    }
+    #subdivider-card button:hover{transform:translateY(-4px)}
+    #scene{position:fixed;inset:0;opacity:0;transition:opacity 1s}
+    #scene.active{opacity:1}
+    #info,#profit-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(0,0,0,.8);color:#0f0;padding:16px 44px;border-radius:50px;font-size:30px;font-weight:900;backdrop-filter:blur(12px)}
+    #profit-bar{bottom:120px;background:rgba(0,255,0,.12);color:#000;font-size:22px;display:none}
+    #profit-bar.active{display:block;animation:glow 2s infinite}
+    @keyframes glow{0%,100%{box-shadow:0 0 30px rgba(0,255,0,.6)}50%{box-shadow:0 0 50px rgba(0,255,0,1)}}
+    #deck-btn{position:fixed;bottom:200px;left:50%;transform:translateX(-50%);background:#0f0;color:#000;padding:18px 50px;border:none;border-radius:50px;font-size:20px;font-weight:700;display:none;z-index:10;cursor:pointer}
+    #reset-area{position:fixed;inset:0;cursor:pointer;z-index:5}
     @media(max-width:768px){
-      .tools{flex-direction:column;gap:2rem;align-items:center}
-      .tool-btn{min-width:280px;font-size:1.2rem}
+      #subdivider-card{padding:50px 40px;width:94vw}
+      #subdivider-card h1{font-size:36px}
     }
   </style>
 </head>
 <body>
 
-  <!-- Elegant Loader -->
+  <!-- Loader -->
   <div id="loader">
     <div class="logo">LANDORIX</div>
     <div class="tagline">Pinal County Intelligence</div>
     <div class="line"></div>
   </div>
 
-  <!-- Main Hub -->
+  <!-- Hub -->
   <div id="hub">
     <h1 class="title">LANDORIX</h1>
     <div class="tools">
       <button class="tool-btn" onclick="location.href='/gis/'">GIS MAP</button>
-      <button class="tool-btn" onclick="location.href='/subdivider/'">SUBDIVIDER</button>
+      <button class="tool-btn" id="open-subdivider">SUBDIVIDER</button>
     </div>
   </div>
 
+  <!-- Subdivider Card (now inside the same file) -->
+  <div id="subdivider-card">
+    <h1>SUBDIVIDER</h1>
+    <select id="zone">
+      <option value="" disabled selected>Select Zoning</option>
+      <option value="CR-1">CR-1 • 20,000 sq ft (80 ft min width)</option>
+      <option value="CR-1A">CR-1A • 1 acre (100 ft min width)</option>
+      <option value="GR">GR • 1.25 acres (100 ft min width)</option>
+      <option value="SH">SH • 2 acres (100 ft min width)</option>
+      <option value="SR">SR • 3.3 acres (no min width)</option>
+    </select>
+    <input id="width" type="number" placeholder="Parcel Width (feet)" min="1">
+    <input id="depth" type="number" placeholder="Parcel Depth (feet)" min="1">
+    <input id="sale-price" type="number" placeholder="Avg Sale Price per Lot ($)">
+    <input id="split-cost" type="number" placeholder="Split Cost per Lot ($)" value="15000">
+    <button onclick="subdivide()">SUBDIVIDE</button>
+  </div>
+
+  <div id="scene"></div>
+  <div id="info"></div>
+  <div id="profit-bar"></div>
+  <button id="deck-btn" onclick="generateDeck()">Generate Pitch Deck</button>
+  <div id="reset-area" onclick="reset()"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.168.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tween.js@18.6.4/dist/tween.umd.js"></script>
   <script>
-    // Clean, bulletproof fade-in
+    // Hub loader
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('loader').classList.add('fade');
@@ -56,6 +109,23 @@
         }, 1800);
       }, 1500);
     });
+
+    document.getElementById('open-subdivider').onclick = () => {
+      document.getElementById('hub').style.display = 'none';
+      document.getElementById('subdivider-card').classList.add('active');
+    };
+
+    const zones={"CR-1":{area:20000,width:80},"CR-1A":{area:43560,width:100},"GR":{area:54450,width:100},"SH":{area:87120,width:100},"SR":{area:143748,width:null}};
+    let scene,camera,renderer,controls,parcelGroup,bestLots;
+
+    function init3D(){scene=new THREE.Scene();scene.background=new THREE.Color(0xffffff);camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,10000);camera.position.set(1000,800,1000);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(window.devicePixelRatio);document.getElementById('scene').appendChild(renderer.domElement);controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.minDistance=400;controls.maxDistance=2500;scene.add(new THREE.AmbientLight(0xffffff,.8));scene.add(((d=new THREE.DirectionalLight(0xffffff,1)).position.set(600,1200,600),d));parcelGroup=new THREE.Group();scene.add(parcelGroup);animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)})}
+    function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}
+    function subdivide(){const z=document.getElementById('zone').value,w=+document.getElementById('width').value,d=+document.getElementById('depth').value,p=+document.getElementById('sale-price').value||0,c=+document.getElementById('split-cost').value||0;if(!z||!w||!d)return alert("Fill all required fields");document.getElementById('subdivider-card').style.opacity=0;setTimeout(()=>{document.getElementById('subdivider-card').style.display='none';document.getElementById('scene').classList.add('active');document.getElementById('deck-btn').style.display='block';init3D();bestLots=createSubdivision(w,d,zones[z],p,c)},600)}
+    function createSubdivision(w,d,rule,sale,cost){parcelGroup.clear();const o1=calc(w,d,rule),o2=calc(d,w,rule),best=o1.lots>=o2.lots?{w,d,...o1}:{w:d,d:w,...o2};const og=new THREE.BoxGeometry(best.w,60,best.d),outline=new THREE.Mesh(og,new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.92}));parcelGroup.add(outline);parcelGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(og),new THREE.LineBasicMaterial({color:0x000000,linewidth:7})));let x=-best.w/2,lotCount=0;while(x<best.w/2){const rw=best.w/2-x,minW=rule.width||rule.area/best.d;if(rw<minW)break;const lw=Math.max(minW,rule.area/best.d);if(lw*best.d<rule.area*.9)break;const lg=new THREE.BoxGeometry(lw,62,best.d),lot=new THREE.Mesh(lg,new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.04}));lot.position.set(x+lw/2,1,0);parcelGroup.add(lot);parcelGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(lg),new THREE.LineBasicMaterial({color:0x000000,linewidth:4})));x+=lw;lotCount++}
+    const acres=(best.w*best.d/43560).toFixed(2),profit=lotCount*sale-lotCount*cost;document.getElementById('info').textContent=`${lotCount} LOTS • ${acres} ACRES`;document.getElementById('profit-bar').innerHTML=`Projected Profit: $${(profit/1000).toFixed(0)}k`;document.getElementById('profit-bar').classList.add('active');parcelGroup.position.y=-300;new TWEEN.Tween(parcelGroup.position).to({y:0},2000).easing(TWEEN.Easing.Elastic.Out).start()}
+    function calc(width,depth,rule){let lots=0,x=0;while(x<width){const rem=width-x,minW=rule.width||rule.area/depth;if(rem<minW)break;const lw=Math.max(minW,rule.area/depth);if(lw*depth<rule.area*.9)break;x+=lw;lots++}return{lots}}
+    function generateDeck(){if(!bestLots)return;alert("Pitch Deck Ready! Share this link:\n"+location.origin+`/deck/${btoa(JSON.stringify(bestLots))}`)}
+    function reset(){document.getElementById('scene').innerHTML='';document.getElementById('scene').classList.remove('active');document.getElementById('deck-btn').style.display='none';document.getElementById('profit-bar').classList.remove('active');document.getElementById('subdivider-card').style.display='block';document.getElementById('subdivider-card').style.opacity=1;document.getElementById('info').textContent=''}
   </script>
 </body>
 </html>

@@ -142,45 +142,87 @@
         <label>Zoning</label>
         <select><option value="">All Zones</option></select>
       </div>
+      <div style="margin-bottom:36px;">
+  <label>Search Parcel / Owner / Address</label>
+  <input type="text" id="parcelSearch" placeholder="e.g. 401- or Smith" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.4);color:white;padding:12px 0;font-size:1.1rem;">
+</div>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // Preloader → map
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('preloader').classList.add('fade');
-        setTimeout(() => {
-          document.body.classList.add('ready');
-          initMap();
-        }, 1600);
-      }, 200);
-    });
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+// Preloader (your mountain stays exactly the same)
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('preloader').classList.add('fade');
+    setTimeout(() => {
+      document.body.classList.add('ready');
+      initMap();
+    }, 1600);
+  }, 200);
+});
 
-    // Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    const drawer = document.getElementById('drawer');
-    hamburger.addEventListener('click', e => {
-      e.stopPropagation();
-      hamburger.classList.toggle('active');
-      drawer.classList.toggle('open');
-    });
-    document.addEventListener('click', () => {
-      hamburger.classList.remove('active');
-      drawer.classList.remove('open');
-    });
-    drawer.addEventListener('click', e => e.stopPropagation());
+// Hamburger menu (unchanged)
+const hamburger = document.getElementById('hamburger');
+const drawer = document.getElementById('drawer');
+hamburger.addEventListener('click', e => { e.stopPropagation(); hamburger.classList.toggle('active'); drawer.classList.toggle('open'); });
+document.addEventListener('click', () => { hamburger.classList.remove('active'); drawer.classList.remove('open'); });
+drawer.addEventListener('click', e => e.stopPropagation());
 
-    // Map init
-    function initMap() {
-      const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Esri · Maxar', maxZoom: 22
-      }).addTo(map);
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-      setTimeout(() => map.invalidateSize(), 400);
+// LIVE parcel loading directly from Pinal County (no download, no database)
+let parcelLayer;
+function initMap() {
+  const map = L.map('map', { zoomControl: false }).setView([32.88, -111.74], 11);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri · Maxar', maxZoom: 22
+  }).addTo(map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  function loadParcels() {
+    const bounds = map.getBounds();
+    const bbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+    const search = (document.getElementById('parcelSearch')?.value || '').trim();
+
+    let url = `https://gis.pinalcountyaz.gov/arcgis/rest/services/Maps/Assessor_Parcels/MapServer/0/query`;
+    url += `?f=geojson&returnGeometry=true&spatialRel=esriSpatialRelIntersects`;
+    url += `&geometry=${encodeURIComponent(bbox)}&geometryType=esriGeometryEnvelope`;
+    url += `&outFields=PARCEL_ID,OWNER_NAME,SITUS_ADDR,TOTAL_VALUE,ZONING`;
+    url += `&outSR=4326`;
+
+    if (search.length >= 2) {
+      url = `https://gis.pinalcountyaz.gov/arcgis/rest/services/Maps/Assessor_Parcels/MapServer/0/query`;
+      url += `?f=geojson&where=PARCEL_ID+LIKE+%27%25${search}%25%27+OR+OWNER_NAME+LIKE+%27%25${search}%25%27+OR+SITUS_ADDR+LIKE+%27%25${search}%25%27`;
+      url += `&outFields=PARCEL_ID,OWNER_NAME,SITUS_ADDR,TOTAL_VALUE,ZONING&outSR=4326`;
     }
-  </script>
+
+    axios.get(url).then(res => {
+      if (parcelLayer) map.removeLayer(parcelLayer);
+      parcelLayer = L.geoJSON(res.data, {
+        style: { color: "#ffffff", weight: 1.4, fillOpacity: 0.07 },
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties;
+          layer.bindPopup(`
+            <strong>Parcel ID:</strong> ${p.PARCEL_ID || '—'}<br>
+            <strong>Owner:</strong> ${p.OWNER_NAME || '—'}<br>
+            <strong>Address:</strong> ${p.SITUS_ADDR || '—'}<br>
+            <strong>Total Value:</strong> $${(p.TOTAL_VALUE || 0).toLocaleString()}<br>
+            <strong>Zoning:</strong> ${p.ZONING || '—'}
+          `);
+        }
+      }).addTo(map);
+    }).catch(() => {});
+  }
+
+  map.on('moveend zoomend', loadParcels);
+  document.getElementById('parcelSearch')?.addEventListener('input', () => {
+    if (document.getElementById('parcelSearch').value.length >= 2 || document.getElementById('parcelSearch').value === '') {
+      loadParcels();
+    }
+  });
+
+  setTimeout(() => { map.invalidateSize(); loadParcels(); }, 500);
+}
+</script>
 </body>
 </html>

@@ -90,6 +90,23 @@
     }
     .drawer input:focus,.drawer select:focus{
       outline:none;border-bottom-color:#fff;
+      /* Fix drawer scrolling on iPhone */
+    @media (max-width: 768px) {
+      .drawer {
+        overflow-y: auto;           /* enables vertical scrolling */
+        -webkit-overflow-scrolling: touch; /* smooth iOS momentum scrolling */
+        padding-bottom: 120px;      /* extra space so last filter isn’t hidden under keyboard */
+      }
+      .drawer h2 {
+        position: sticky;
+        top: 0;
+        background: #000;
+        z-index: 10;
+        padding: 20px 40px 12px;
+        margin: 0 -40px 30px -40px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+    }
     }
   </style>
 </head>

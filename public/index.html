@@ -43,6 +43,7 @@
       <div style="margin-bottom:36px;"><label>Search Parcel / Owner / Address</label><input type="text" id="parcelSearch" placeholder="e.g. 401- or Smith" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.4);color:white;padding:12px 0;font-size:1.1rem;"></div>
     </div>
   </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
@@ -51,25 +52,45 @@
     hamburger.addEventListener('click',e=>{e.stopPropagation();hamburger.classList.toggle('active');drawer.classList.toggle('open');});
     document.addEventListener('click',()=>{hamburger.classList.remove('active');drawer.classList.remove('open');});
     drawer.addEventListener('click',e=>e.stopPropagation());
+
     let parcelLayer;
     function initMap(){
       const map=L.map('map',{zoomControl:false}).setView([32.88,-111.74],11);
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri · Maxar',maxZoom:22}).addTo(map);
       L.control.zoom({position:'bottomright'}).addTo(map);
+
       function loadParcels(){
-        const b=map.getBounds(),bbox=`${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
-        const s=(document.getElementById('parcelSearch')?.value||'').trim();
-        let url=`/taxparcels?bbox=${bbox}`;
-        if(s.length>=2)url+=`&search=${s}`;
+        const b=map.getBounds();
+        const bbox=`${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
+        const search=(document.getElementById('parcelSearch')?.value||'').trim();
+
+        // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+        // REPLACE THIS LINE WITH YOUR REAL BACKEND URL
+        let url = `https://backend-production-xxxx.up.railway.app/taxparcels?bbox=${bbox}`;
+        // ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+        if(search.length>=2) url += `&search=${encodeURIComponent(search)}`;
+
         axios.get(url).then(r=>{
-          if(parcelLayer)map.removeLayer(parcelLayer);
-          parcelLayer=L.geoJSON(r.data,{style:{color:"#ffffff",weight:1.4,fillOpacity:0.07},
-            onEachFeature:(f,l)=>{const p=f.properties;l.bindPopup(`<strong>Parcel:</strong> ${p.parcel_id}<br><strong>Owner:</strong> ${p.owner_name}<br><strong>Address:</strong> ${p.situs_addr}<br><strong>Acres:</strong> ${p.acres?.toFixed(2)}<br><strong>Value:</strong> $${p.total_value?.toLocaleString()}<br><strong>Zoning:</strong> ${p.zoning}`);}
+          if(parcelLayer) map.removeLayer(parcelLayer);
+          parcelLayer=L.geoJSON(r.data,{
+            style:{color:"#ffffff",weight:1.4,fillOpacity:0.07},
+            onEachFeature:(f,l)=>{
+              const p=f.properties;
+              l.bindPopup(`
+                <strong>Parcel:</strong> ${p.parcel_id}<br>
+                <strong>Owner:</strong> ${p.owner_name}<br>
+                <strong>Address:</strong> ${p.situs_addr}<br>
+                <strong>Acres:</strong> ${p.acres}<br>
+                <strong>Value:</strong> $${Number(p.total_value).toLocaleString()}<br>
+                <strong>Zoning:</strong> ${p.zoning}
+              `);
+            }
           }).addTo(map);
-        });
+        }).catch(()=>{});
       }
+
       map.on('moveend zoomend',loadParcels);
-      document.getElementById('parcelSearch')?.addEventListener('input',()=>{if(document.getElementById('parcelSearch').value.length>=2||document.getElementById('parcelSearch').value==='')loadParcels();});
+      document.getElementById('parcelSearch')?.addEventListener('input',()=>{clearTimeout(window.st);window.st=setTimeout(loadParcels,500);});
       setTimeout(()=>{map.invalidateSize();loadParcels();},500);
     }
   </script>

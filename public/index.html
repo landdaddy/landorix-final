@@ -23,15 +23,19 @@
       position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
       transition:opacity 1.6s ease-out;
     }
-    #preloader.fade{opacity:0;pointer-events:none;}
     #preloader h1{
-      font-size:clamp(4rem,14vw,10rem);font-weight:700;letter-spacing:0.7rem;color:#fff;
-      text-shadow:0 0 50px rgba(255,255,255,0.7);
+      font-size:clamp(3.2rem, 11vw, 7rem);
+      font-weight:700;
+      letter-spacing:0.6rem;
+      color:#fff;
+      text-shadow:0 0 40px rgba(255,255,255,0.6);
     }
     .mountain{
-      width:clamp(200px,80vw,420px);margin-top:40px;
+      width:clamp(160px, 58vw, 280px);
+      max-width:88vw;
+      margin-top:32px;
       animation:float 7s ease-in-out infinite;
-      filter:drop-shadow(0 0 30px rgba(255,255,255,0.4));
+      filter:drop-shadow(0 0 22px rgba(255,255,255,0.35));
     }
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
 

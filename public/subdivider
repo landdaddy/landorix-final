@@ -1,1 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LANDORIX • Subdivider</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;overflow:hidden;font-family:Helvetica,Arial,sans-serif;perspective:1500px}
+#input-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.95);backdrop-filter:blur(20px);padding:50px 60px;border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.12);width:420px;text-align:center;z-index:100;transition:all .6s cubic-bezier(.16,1,.3,1)}
+h1{font-size:42px;font-weight:900;margin-bottom:30px;color:#000}
+select,input,button{width:100%;padding:18px 20px;margin:12px 0;border:none;border-radius:16px;font-size:18px}
+select,input{background:rgba(0,0,0,.04);color:#000}
+button{background:#000;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+button:hover{transform:translateY(-3px);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+#scene{position:absolute;inset:0;opacity:0;transition:opacity 1s}
+#scene.active{opacity:1}
+#info,#profit-bar{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#0f0;padding:16px 40px;border-radius:50px;font-size:28px;font-weight:900;backdrop-filter:blur(10px)}
+#profit-bar{bottom:120px;background:rgba(0,255,0,.1);color:#000;font-size:20px;min-width:300px;display:none}
+#profit-bar.active{display:block;animation:p 2s infinite}
+@keyframes p{0%,100%{box-shadow:0 0 20px rgba(0,255,0,.5)}50%{box-shadow:0 0 40px rgba(0,255,0,.8)}}
+#deck-btn{background:#0f0;display:none;position:absolute;bottom:200px;left:50%;transform:translateX(-50%);padding:15px 40px}
+#reset-area{position:absolute;inset:0;cursor:pointer}
+</style>
+</head>
+<body>
 
+<div id="input-card">
+  <h1>SUBDIVIDER</h1>
+  <select id="zone"><option value="" disabled selected>Select Zoning</option>
+    <option value="CR-1">CR-1 • 20,000 sq ft (80 ft min width)</option>
+    <option value="CR-1A">CR-1A • 1 acre (100 ft min width)</option>
+    <option value="GR">GR • 1.25 acres (100 ft min width)</option>
+    <option value="SH">SH • 2 acres (100 ft min width)</option>
+    <option value="SR">SR • 3.3 acres (no min width)</option>
+  </select>
+  <input id="width" type="number" placeholder="Parcel Width (feet)" min="1">
+  <input id="depth" type="number" placeholder="Parcel Depth (feet)" min="1">
+  <input id="sale-price" type="number" placeholder="Avg Sale Price per Lot ($)">
+  <input id="split-cost" type="number" placeholder="Split Cost per Lot ($)" value="15000">
+  <button onclick="subdivide()">SUBDIVIDE</button>
+</div>
+
+<div id="scene"></div>
+<div id="info"></div>
+<div id="profit-bar"></div>
+<button id="deck-btn" onclick="generateDeck()">Generate Pitch Deck</button>
+<div id="reset-area" onclick="reset()"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.168.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tween.js@18.6.4/dist/tween.umd.js"></script>
+<script>
+const zones={"CR-1":{area:20000,width:80},"CR-1A":{area:43560,width:100},"GR":{area:54450,width:100},"SH":{area:87120,width:100},"SR":{area:143748,width:null}};
+let scene,camera,renderer,controls,parcelGroup,bestLots;
+function init3D(){scene=new THREE.Scene();scene.background=new THREE.Color(0xffffff);camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,10000);camera.position.set(800,600,800);renderer=new THREE.WebGLRenderer({antialias:!0});renderer.setSize(innerWidth,innerHeight);document.getElementById('scene').appendChild(renderer.domElement);controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=!0;controls.minDistance=300;controls.maxDistance=2000;scene.add(new THREE.AmbientLight(0xffffff,.8));scene.add(((d=new THREE.DirectionalLight(0xffffff,1)).position.set(500,1000,500),d));parcelGroup=new THREE.Group();scene.add(parcelGroup);animate();}
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}
+function subdivide(){const z=document.getElementById('zone').value,w=+document.getElementById('width').value,d=+document.getElementById('depth').value,p=+document.getElementById('sale-price').value||0,c=+document.getElementById('split-cost').value||0;if(!z||!w||!d)return alert("Fill zoning, width, depth");document.getElementById('input-card').style.opacity=0;setTimeout(()=>{document.getElementById('input-card').style.display='none';document.getElementById('scene').classList.add('active');document.getElementById('deck-btn').style.display='block';init3D();bestLots=createSubdivision(w,d,zones[z],p,c)},600)}
+function createSubdivision(w,d,rule,sale,cost){parcelGroup.clear();const o1=calc(w,d,rule),o2=calc(d,w,rule),best=o1.lots>=o2.lots?{w,d,...o1}:{w:d,d:w,...o2};const og=new THREE.BoxGeometry(best.w,50,best.d),om=new THREE.MeshBasicMaterial({color:0x000000,transparent:!0,opacity:.9}),outline=new THREE.Mesh(og,om),wire=new THREE.LineSegments(new THREE.EdgesGeometry(og),new THREE.LineBasicMaterial({color:0x000000,linewidth:6}));parcelGroup.add(outline,wire);let x=-best.w/2,lotCount=0;while(x<best.w/2){const rw=best.w/2-x,minW=rule.width||rule.area/best.d;if(rw<minW)break;const lw=Math.max(minW,rule.area/best.d);if(lw*best.d<rule.area*.9)break;const lg=new THREE.BoxGeometry(lw,52,best.d),lm=new THREE.MeshBasicMaterial({color:0x000000,transparent:!0,opacity:.04}),lot=new THREE.Mesh(lg,lm);lot.position.set(x+lw/2,1,0);parcelGroup.add(lot);parcelGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(lg),new THREE.LineBasicMaterial({color:0x000000,linewidth:3})));x+=lw;lotCount++}
+const acres=(best.w*best.d/43560).toFixed(2),profit=lotCount*sale-lotCount*cost;document.getElementById('info').textContent=`${lotCount} LOTS • ${acres} ACRES`;document.getElementById('profit-bar').innerHTML=`Projected Profit: $${(profit/1000).toFixed(0)}k`;document.getElementById('profit-bar').classList.add('active');parcelGroup.position.y=-200;new TWEEN.Tween(parcelGroup.position).to({y:0},1800).easing(TWEEN.Easing.Elastic.Out).start();return {lots:lotCount,acres,profit}}
+function calc(width,depth,rule){let lots=0,x=0;while(x<width){const rem=width-x,minW=rule.width||rule.area/depth;if(rem<minW)break;const lw=Math.max(minW,rule.area/depth);if(lw*depth<rule.area*.9)break;x+=lw;lots++}return{lots}}
+function generateDeck(){if(!bestLots)return;const url=`/subdivider/deck/${btoa(JSON.stringify(bestLots))}`;alert("Pitch Deck Ready! Share this link:\n"+location.origin+url)}
+function reset(){document.getElementById('scene').innerHTML='';document.getElementById('scene').classList.remove('active');document.getElementById('deck-btn').style.display='none';document.getElementById('profit-bar').classList.remove('active');document.getElementById('input-card').style.display='block';document.getElementById('input-card').style.opacity=1;document.getElementById('info').textContent=''}
+</script>
+</body>
+</html>

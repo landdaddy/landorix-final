@@ -7,23 +7,30 @@ import json
 
 app = Flask(__name__)
 
-# CORS – allow both Railway URL and your custom domain
-allowed_origins = os.getenv("CORS_ORIGINS", "https://lucky-balance-production.up.railway.app,https://landorix.com")
-CORS(app, origins=allowed_origins.split(","))
+# Allow both your Railway frontend URL and your custom domain
+allowed_origins = os.getenv(
+    "CORS_ORIGINS",
+    "https://lucky-balance-production.up.railway.app,https://landorix.com"
+)
+CORS(app, origins=[origin.strip() for origin in allowed_origins.split(",")])
 
-# Lazy database connection + postgres → postgresql fix
+# Lazy database connection (no more crashes on startup)
 def get_conn():
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         raise RuntimeError("DATABASE_URL environment variable is not set")
-    # Railway gives postgres:// – SQLAlchemy/PostGIS needs postgresql://
+    # Railway gives postgres:// → psycopg2 needs postgresql://
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     return psycopg2.connect(db_url)
 
 @app.route("/")
 def home():
-    return jsonify({"message": "LANDORIX backend is live!"})
+    return jsonify({
+        "message": "LANDORIX backend is live!",
+        "parcels_endpoint": "/taxparcels",
+        "status": "ready"
+    })
 
 @app.route("/taxparcels")
 def taxparcels():
@@ -71,7 +78,7 @@ def taxparcels():
                     "parcel_id": row["parcel_id"] or "",
                     "owner_name": row["owner_name"] or "",
                     "situs_addr": row["situs_addr"] or "",
-                    "total_value": row["total_value"] or 0,
+                    "total_value": float(row["total_value"]) if row["total_value"] else 0,
                     "zoning": row["zoning"] or "",
                     "acres": round(row["acres"], 2) if row["acres"] else 0
                 }
@@ -83,4 +90,5 @@ def taxparcels():
     })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)

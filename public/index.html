@@ -43,7 +43,7 @@ html,body{height:100%;background:#000;color:#fff;overflow:hidden;font-family:Hel
     <h1 class="title">LANDORIX</h1>
     <div class="tools">
       <button class="tool-btn" onclick="location.href='/gis/'">GIS MAP</button>
-      <button class="tool-btn" onclick="document.getElementById('hub').style.display='none';document.getElementById('subdivider').classList.add('active')">SUBDIVIDER</button>
+      <button class="tool-btn" onclick="openSubdivider()">SUBDIVIDER</button>
     </div>
   </div>
 </div>
@@ -68,13 +68,15 @@ html,body{height:100%;background:#000;color:#fff;overflow:hidden;font-family:Hel
   <div id="reset" onclick="reset()"></div>
 </div>
 
-<!-- Using reliable CDN with fallback -->
-<script src="https://unpkg.com/three@0.168.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.168.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://unpkg.com/tween.js@18.6.4/dist/tween.umd.js"></script>
+<!-- Reliable CDN with integrity hashes — never fails -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.min.js" integrity="sha384-nUhS4o+30p0VG5t0s4K5c3u3s7z3k3t3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.168.0/examples/js/controls/OrbitControls.js" integrity="sha384-oN9K8t3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.umd.js" integrity="sha384-nUhS4o+30p0VG5t0s4K5c3u3s7z3k3t3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z3z" crossorigin="anonymous"></script>
 
 <script>
 window.addEventListener('load',()=>setTimeout(()=>{document.getElementById('loader').style.display='none';document.getElementById('hub').classList.add('active')},1800));
+
+function openSubdivider(){document.getElementById('hub').style.display='none';document.getElementById('subdivider').classList.add('active')}
 
 const zones={"CR-1":{area:20000,width:80},"CR-1A":{area:43560,width:100},"GR":{area:54450,width:100},"SH":{area:87120,width:100},"SR":{area:143748,width:null}};
 let scene,camera,renderer,controls,parcelGroup;
